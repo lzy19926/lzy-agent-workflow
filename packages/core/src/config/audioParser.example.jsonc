@@ -1,0 +1,84 @@
+{
+  // ==================== OSS 配置 (AliOSSUploader) ====================
+  // 阿里云对象存储配置，用于存储上传的音频文件
+  "oss": {
+    // OSS Bucket 名称 - 在阿里云 OSS 控制台创建的存储空间名称
+    "bucket": "your-bucket-name",
+    // OSS 所在地域 - 根据 Bucket 所在区域填写，如 oss-cn-chengdu、oss-cn-hangzhou
+    "region": "oss-cn-chengdu",
+    // OSS Access Key ID - 阿里云账号的访问密钥 ID
+    "accessKeyId": "your-access-key-id",
+    // OSS Access Key Secret - 阿里云账号的访问密钥秘密
+    "accessKeySecret": "your-access-key-secret",
+    // OSS 对象前缀 - 上传文件的路径前缀，默认 'videos/'
+    "prefix": "videos/",
+    // OSS 存储类型 - Standard(标准)、IA(低频访问)、Archive(归档)、ColdArchive(冷归档)
+    "storageClass": "Standard",
+    // OSS 请求超时时间 (毫秒)，默认 300000 (5 分钟)
+    "timeout": 300000
+  },
+
+  // ==================== ASR 配置 (QwenAsrParser) ====================
+  // 通义千问语音识别配置，用于将音频转换为文字
+  "asr": {
+    // 语音识别 API Key - 在阿里云百炼/ DashScope 控制台获取
+    "apiKey": "sk-your-qwen-api-key",
+    // ASR 模型名称 - qwen3-asr-flash-filetrans 用于文件转写
+    "model": "qwen3-asr-flash-filetrans",
+    // 是否开启逆文本正则化 - 将数字、日期等转换为自然语言形式 (如 "2024 年" 而非 "二零二四年")
+    "enableItn": false,
+    // 是否开启词级时间戳 - 每个词的时间戳，开启后更精确但数据量更大
+    "enableWords": true,
+    // ASR 语言代码 - zh(中文)、en(英文)、ja(日文) 等
+    "language": "zh",
+    // ASR 轮询间隔 (毫秒) - 查询转写进度的间隔时间
+    "pollInterval": 2000,
+    // ASR 超时时间 (毫秒) - 转写任务的最大等待时间
+    "timeout": 300000
+  },
+
+  // ==================== Qwen Chat 配置 (QwenChat) ====================
+  // 通义千问对话模型配置，用于整理和结构化 ASR 输出的文本
+  "qwen": {
+    // Qwen Chat API Key - 可与 ASR 共用一个 API Key
+    "apiKey": "sk-your-qwen-api-key",
+    // Qwen Chat 基础 URL - DashScope 兼容模式端点
+    "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    // Qwen Chat 模型名称 - qwen3-max 为当前最强模型
+    "model": "qwen3-max"
+  },
+
+  // ==================== 下载器配置 (BilibiliDownloader) ====================
+  // 视频/音频下载器配置，支持 B 站等平台
+  "downloader": {
+    // 下载输出目录 - 视频/音频文件保存的本地路径
+    "outputDir": "./cache/downloads",
+    // 下载质量 - fast(快速)、medium(中等)、slow(高质量)
+    "quality": "fast",
+    // 是否需要视频 - false 表示只下载音频轨道
+    "needVideo": false,
+    // 字幕语言优先级列表 - 按顺序尝试获取字幕
+    "subtitleLangs": ["zh-Hans", "zh", "zh-CN", "ai-zh", "en", "en-US"],
+    // 平台特定配置
+    "platforms": {
+      // B 站 (bilibili) 平台配置
+      "bilibili": {
+        // 视频格式 - mp4 为常用格式
+        "videoFormat": "mp4",
+        // 音频格式 - mp3 为常用格式
+        "audioFormat": "mp3",
+        // 是否下载封面图
+        "downloadCover": true,
+        // 是否获取字幕文件
+        "fetchSubtitles": true
+      }
+    }
+  },
+
+  // ==================== 额外配置 ====================
+  // AudioParser 特有的额外配置项
+  "extra": {
+    // 文本整理 prompt 文件路径 - 用于指导 Qwen 整理 ASR 输出文本的提示词模板
+    "summarizerPromptPath": "./src/skills/text_summarizer.md"
+  }
+}

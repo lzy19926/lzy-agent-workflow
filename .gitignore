@@ -1,0 +1,21 @@
+.claude/
+openspec/
+node_modules/
+dist/
+output/
+packages/test_project/
+# 私钥配置文件
+.env
+packages/core/src/config/audioParser.json
+.env.local
+*.log
+.DS_Store
+coverage/
+*.tsbuildinfo
+output/*
+!output/.gitkeep
+cache/*
+!cache/.gitkeep
+.bin
+.vscode
+.idea
