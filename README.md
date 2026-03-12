@@ -1,37 +1,76 @@
-# VideoMemo
+# VideoMemo - AI 智能视频解析与代码分析工作台
 
-视频解析工具 - 从 Bilibili 等视频平台下载音频并转录为文本
+> 一站式 AI 集成工作台 - 视频转录 + 代码分析 + AI 自动化测试
+
+## 功能特性
+
+### 视频解析
+- 支持 Bilibili 等视频平台音频提取
+- 通义千问 ASR 语音转文字
+- 智能文本整理与摘要
+- 实时任务进度追踪
+- 历史记录持久化存储
+
+### 代码分析
+- 支持 TypeScript/JavaScript 项目系统性分析
+- 多步骤可配置分析流程
+- 生成结构化架构报告
+- 支持技术栈识别与框架检测
+- 分析历史可追溯查看
+
+### AI 自动化测试
+- 基于 Playwright MCP 的端到端测试
+- AI 辅助生成测试用例
+- 跨浏览器兼容性测试
+- 实时 UI 调试模式
+
+---
+
+## 技术栈
+
+| 层级 | 技术 |
+|------|------|
+| **前端** | React 18 + Vite + TypeScript + Ant Design 5 |
+| **后端** | Express 4 + TypeScript |
+| **数据库** | IndexedDB (Dexie.js) + 内存存储 |
+| **AI 服务** | 通义千问 ASR + 阿里云 OSS |
+| **视频处理** | yt-dlp + FFmpeg |
+| **测试框架** | Playwright + Playwright MCP |
+
+---
 
 ## 项目结构
 
 ```
 lzy-VideoMemo/
-├── packages/          # 大库结构
-│   ├── frontend/      # React 前端应用
-│   ├── backend/       # Express 后端 API 服务
-│   ├── core/          # 核心解析逻辑
-│   └── scripts/       # 启动脚本和文档
-├── openspec/          # OpenSpec 设计文档
-├── output/            # 解析结果输出目录
-└── ...配置文件
+├── packages/
+│   ├── frontend/        # React 前端应用 (Vite + Ant Design)
+│   ├── backend/         # Express 后端 API 服务
+│   ├── core/            # 核心解析逻辑 (下载器/解析器/工具)
+│   ├── e2e/             # Playwright E2E 测试套件
+│   └── scripts/         # 启动脚本
+├── openspec/            # OpenSpec 设计文档
+├── output/              # 解析结果输出目录
+└── README.md
 ```
+
+---
 
 ## 快速开始
 
-### 1. 前置要求
+### 前置要求
 
 - Node.js >= 18.0.0
 - pnpm >= 8.0.0
-- yt-dlp（已包含在 bin/ 目录）
-- FFmpeg（已包含在 bin/ffmpeg/ 目录）
+- yt-dlp 和 FFmpeg（已内置于 `bin/` 目录）
 
-### 2. 安装依赖
+### 安装依赖
 
 ```bash
 pnpm install
 ```
 
-### 3. 配置环境变量
+### 配置环境变量
 
 在 `packages/backend/` 目录下创建 `.env` 文件：
 
@@ -40,7 +79,7 @@ cd packages/backend
 cp .env.example .env
 ```
 
-编辑 `.env` 文件，填入你的阿里云 API 密钥：
+编辑 `.env` 文件：
 
 ```env
 # 阿里云 OSS 配置
@@ -53,22 +92,18 @@ OSS_ACCESS_KEY_SECRET=your_access_key_secret
 ASR_API_KEY=sk-your_api_key
 ```
 
-### 4. 启动服务
+### 启动服务
 
-#### 方式一：一键启动（推荐）
-
-**Windows:**
+**一键启动（推荐）:**
 ```bash
+# Windows
 packages\scripts\start.bat
-```
 
-**Linux/Mac:**
-```bash
+# Linux/Mac
 bash packages/scripts/start-dev.sh
 ```
 
-#### 方式二：分别启动
-
+**分别启动:**
 ```bash
 # 终端 1 - 启动后端
 pnpm dev:backend
@@ -77,206 +112,152 @@ pnpm dev:backend
 pnpm dev:frontend
 ```
 
-### 5. 访问应用
+### 访问应用
 
 - 前端应用：http://localhost:5173
 - 后端 API：http://localhost:3000
-- API 健康检查：http://localhost:3000/api/tasks/health
+- 健康检查：http://localhost:3000/api/tasks/health
+
+---
+
+## AI 自动化测试 (Playwright MCP)
+
+项目集成了 **Playwright MCP** 进行端到端自动化测试。
+
+### 运行测试
+
+```bash
+cd packages/e2e
+
+# 安装浏览器
+pnpm install:browser
+
+# 运行所有测试
+pnpm test
+
+# UI 模式（推荐用于调试）
+pnpm test:ui
+
+# 调试模式
+pnpm test:debug
+
+# 有头模式（显示浏览器）
+pnpm test:headed
+
+# 只运行 Chromium
+pnpm test:chromium
+
+# 查看测试报告
+pnpm test:report
+```
+
+### 测试覆盖范围
+
+| 测试文件 | 测试内容 |
+|---------|---------|
+| `navigation.test.ts` | 导航菜单、路由跳转、响应式布局 |
+| `homepage.test.ts` | 视频 URL 输入、表单验证、任务创建 |
+| `settings.test.ts` | API Key 配置、输出目录设置 |
+| `analysis-page.test.ts` | 项目验证、步骤选择、分析流程 |
+| `history-pages.test.ts` | 历史记录列表、查看/删除、分页 |
+| `task-detail.test.ts` | 任务状态、进度条、结果展示 |
+| `user-flow.test.ts` | 完整用户流程、跨浏览器测试 |
+
+### 使用 AI MCP 生成测试
+
+通过 Claude Code 与 Playwright MCP 集成，可以：
+
+1. **自动分析页面结构** - MCP 自动捕获页面快照
+2. **生成页面对象模型** - 自动提取可交互元素
+3. **创建测试用例** - 基于用户操作流程生成测试
+4. **实时调试** - UI 模式可视化调试
+
+---
 
 ## 使用指南
 
-1. **配置 API 密钥**
-   - 访问设置页面
-   - 输入阿里云 ASR API Key
-   - 保存配置
+### 视频解析
 
-2. **解析视频**
-   - 在首页输入 B 站视频 URL
-   - 点击"开始解析"
-   - 等待解析完成
+1. 访问 **设置** 页面，配置阿里云 API Key
+2. 在 **首页** 输入 B 站视频 URL
+3. 点击 **开始解析**
+4. 等待解析完成，查看结果（原始文本/整理文本/Markdown）
 
-3. **查看结果**
-   - 解析完成后可查看原始文本和整理后文本
-   - 支持一键复制
-   - 结果自动保存到 `output/` 目录
+### 代码分析
 
-4. **历史记录**
-   - 所有解析记录保存在浏览器 IndexedDB
-   - 关闭浏览器后仍然存在
-   - 支持删除和批量删除
+1. 访问 **代码分析** 页面
+2. 输入代码项目目录路径
+3. 点击 **验证** 确认项目有效
+4. 选择分析步骤（支持全选/自定义）
+5. 点击 **开始分析**
+6. 查看实时进度和分析报告
 
-## API 文档
+### 历史记录
 
-### 创建任务
+- **视频历史** - 查看所有视频解析任务
+- **分析历史** - 查看代码分析任务
+- 支持查看、删除操作
+- 数据持久化于 IndexedDB
+
+---
+
+## API 快速参考
+
+### 创建视频任务
 ```bash
 POST /api/tasks
-Content-Type: application/json
-
 {
   "videoUrl": "https://www.bilibili.com/video/BVxxx"
 }
 ```
 
-响应:
-```json
-{
-  "taskId": "uuid",
-  "status": "pending"
-}
-```
-
-### 获取任务列表
+### 创建分析任务
 ```bash
-GET /api/tasks
-```
-
-响应:
-```json
+POST /api/analyze
 {
-  "tasks": [
-    {
-      "id": "uuid",
-      "videoUrl": "https://...",
-      "title": "视频标题",
-      "status": "completed",
-      "progress": 100,
-      "createdAt": "2024-01-01T00:00:00Z"
-    }
-  ]
+  "projectPath": "/path/to/project",
+  "selectedStepKeys": ["step1", "step2"]
 }
 ```
 
-### 获取任务详情
+### 获取任务状态
 ```bash
 GET /api/tasks/:id
+GET /api/analyze/:id
 ```
 
-### 删除任务
-```bash
-DELETE /api/tasks/:id
-```
-
-### SSE 事件推送
+### SSE 实时事件
 ```bash
 GET /api/events?taskId=:id
 ```
 
-事件格式:
-```json
-{
-  "type": "progress",
-  "taskId": "uuid",
-  "data": {
-    "status": "processing",
-    "progress": 50,
-    "message": "正在下载..."
-  }
-}
-```
+---
 
-## 测试
+## 文档链接
 
-### 运行 API 测试
+- [启动指南](packages/scripts/STARTUP.md)
+- [API 文档](packages/scripts/API.md)
+- [测试指南](packages/scripts/TEST_GUIDE.md)
+- [E2E 测试文档](packages/e2e/README.md)
 
-```bash
-# 确保后端服务已启动
-pnpm test:api
-```
-
-### 测试指南
-
-详细测试文档请参阅 [packages/scripts/TEST_GUIDE.md](packages/scripts/TEST_GUIDE.md)
-
-## 文档
-
-- **[启动文档](packages/scripts/STARTUP.md)** - 详细的项目启动指南
-- **[API 文档](packages/scripts/API.md)** - API 接口说明
-- **[测试指南](packages/scripts/TEST_GUIDE.md)** - 测试方法和步骤
-
-## 技术栈
-
-- **前端**: React 18 + Vite + Ant Design 5 + TypeScript
-- **后端**: Express 4 + TypeScript（单层架构）
-- **数据库**: IndexedDB (Dexie.js)
-- **核心模块**: 通义千问 ASR + 阿里云 OSS + yt-dlp + FFmpeg
-
-## 后端架构说明
-
-后端采用简化的单层架构，路由直接处理所有业务逻辑：
-
-```
-packages/backend/src/
-├── index.ts           # Express 入口
-└── routes/
-    └── tasks.ts       # 任务路由（包含所有业务逻辑）
-```
-
-### 特点
-- 无分层架构，路由即服务
-- 内存存储任务（轻量级，无需数据库）
-- SSE 实时推送任务进度
-- 支持断线重连
-
-## 前端架构说明
-
-```
-packages/frontend/src/
-├── db/                # IndexedDB 封装
-│   ├── index.ts       # 数据库定义
-│   ├── taskStore.ts   # 任务 CRUD
-│   └── configStore.ts # 配置 CRUD
-├── hooks/             # React Hooks
-│   ├── useTasks.ts    # 任务查询 Hook
-│   └── useConfigs.ts  # 配置查询 Hook
-├── pages/             # 页面组件
-│   ├── HomePage.tsx   # 首页
-│   ├── HistoryPage.tsx # 历史记录
-│   ├── TaskDetailPage.tsx # 任务详情
-│   └── SettingsPage.tsx # 设置
-└── components/        # 公共组件
-    └── Layout.tsx     # 布局组件
-```
-
-## 核心模块
-
-`packages/core/` 目录包含可重用的视频解析模块：
-
-```
-packages/core/src/
-├── downloaders/       # 视频下载器 (BilibiliDownloader)
-├── audioParser/       # 音频解析器 (QwenAsrParser, AliOSSUploader)
-├── llm/               # 通义千问 LLM (QwenChat, QwenAsr)
-├── tools/             # FFmpeg, yt-dlp 工具
-└── config/            # 配置文件
-```
+---
 
 ## 常见问题
 
-### 1. 端口被占用
+### 端口被占用
+修改 `packages/backend/.env` 中的 `PORT`，或修改 `vite.config.ts` 中的 `server.port`
 
-修改 `packages/backend/.env`:
-```env
-PORT=3001
-```
-
-修改 `packages/frontend/vite.config.ts`:
-```ts
-server: {
-  port: 5174,
-}
-```
-
-### 2. API Key 无效
-
+### API Key 无效
 - 检查阿里云账号是否欠费
-- 确认 API Key 格式正确（sk-开头）
-- 检查 ASR 服务是否开通
+- 确认 API Key 格式正确（`sk-` 开头）
+- 确认 ASR 服务已开通
 
-### 3. 下载失败
-
-- 检查 yt-dlp 是否为最新版本
+### 下载失败
 - 检查网络连接
 - 确认视频 URL 有效
+- 更新 yt-dlp: `yt-dlp -U`
+
+---
 
 ## 许可证
 
