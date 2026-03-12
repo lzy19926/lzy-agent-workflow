@@ -1,0 +1,36 @@
+# Playwright test results
+test-results/
+playwright-report/
+
+# Browser storage
+playwright/.auth/
+playwright/.cache/
+
+# Screenshots
+screenshots/
+
+# Coverage
+coverage/
+
+# Node modules
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+.env.*.local
