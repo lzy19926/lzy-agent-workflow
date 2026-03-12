@@ -53,7 +53,11 @@ const AnalysisPage: React.FC = () => {
     try {
       const result = await analyzeApi.submitAnalyze(projectPath, selectedStepKeys);
       setTaskId(result.taskId);
-      setAnalysisSteps(result.steps);
+      // 根据选择的步骤过滤步骤列表
+      const stepsToShow = selectedStepKeys && selectedStepKeys.length > 0
+        ? result.steps.filter(s => selectedStepKeys.includes(s.key))
+        : result.steps;
+      setAnalysisSteps(stepsToShow);
       // 清除 URL 参数
       window.history.replaceState({}, '', '/analysis');
       // 保存任务到 IndexDB - 使用简单方式获取项目名称
@@ -64,7 +68,7 @@ const AnalysisPage: React.FC = () => {
         projectPath,
         status: 'pending',
         progress: 0,
-        steps: result.steps,
+        steps: stepsToShow,
         selectedStepKeys,
       });
     } catch (err: any) {
