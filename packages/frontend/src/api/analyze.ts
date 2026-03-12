@@ -26,8 +26,8 @@ export interface AnalysisTask {
 
 export const analyzeApi = {
   // 提交分析请求
-  async submitAnalyze(projectPath: string): Promise<{ taskId: string; steps: AnalysisStepConfig[] }> {
-    const response = await axios.post(`${API_BASE_URL}/analyze`, { projectPath });
+  async submitAnalyze(projectPath: string, selectedStepKeys?: string[]): Promise<{ taskId: string; steps: AnalysisStepConfig[] }> {
+    const response = await axios.post(`${API_BASE_URL}/analyze`, { projectPath, selectedStepKeys });
     return response.data;
   },
 
@@ -61,7 +61,7 @@ export const analyzeApi = {
   },
 
   // 验证项目目录
-  async validateProject(projectPath: string): Promise<{ valid: boolean; info?: ProjectInfo; error?: string }> {
+  async validateProject(projectPath: string): Promise<{ valid: boolean; info?: ProjectInfo; error?: string; steps?: AnalysisStepConfig[] }> {
     const response = await axios.post(`${API_BASE_URL}/analyze/validate`, { projectPath });
     return response.data;
   },

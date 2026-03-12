@@ -48,10 +48,10 @@ const AnalysisPage: React.FC = () => {
   }, []);
 
   // 开始分析
-  const handleAnalyze = useCallback(async (projectPath: string) => {
+  const handleAnalyze = useCallback(async (projectPath: string, selectedStepKeys?: string[]) => {
     setIsLoading(true);
     try {
-      const result = await analyzeApi.submitAnalyze(projectPath);
+      const result = await analyzeApi.submitAnalyze(projectPath, selectedStepKeys);
       setTaskId(result.taskId);
       setAnalysisSteps(result.steps);
       // 清除 URL 参数
@@ -65,6 +65,7 @@ const AnalysisPage: React.FC = () => {
         status: 'pending',
         progress: 0,
         steps: result.steps,
+        selectedStepKeys,
       });
     } catch (err: any) {
       console.error('Failed to submit analyze:', err);

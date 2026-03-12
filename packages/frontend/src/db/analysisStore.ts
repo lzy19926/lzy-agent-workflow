@@ -19,6 +19,7 @@ export interface AnalysisTaskRecord {
   progress: number;
   error?: string;
   steps?: any[];
+  selectedStepKeys?: string[];
   createdAt: string;
   completedAt?: string;
 }

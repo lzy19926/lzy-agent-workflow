@@ -7,13 +7,13 @@ const analysisService = new AnalysisService();
 // 提交分析请求
 router.post('/', async (req, res) => {
   try {
-    const { projectPath } = req.body;
+    const { projectPath, selectedStepKeys } = req.body;
 
     if (!projectPath) {
       return res.status(400).json({ message: 'projectPath 是必需参数' });
     }
 
-    const task = await analysisService.createTask(projectPath);
+    const task = await analysisService.createTask(projectPath, selectedStepKeys);
     const steps = getAnalysisSteps();
     res.json({ taskId: task.id, steps });
   } catch (error: any) {
@@ -118,7 +118,8 @@ router.post('/validate', async (req, res) => {
     }
 
     const result = await analysisService.validateProject(projectPath);
-    res.json(result);
+    // 返回分析步骤列表供前端展示
+    res.json({ ...result, steps: getAnalysisSteps() });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

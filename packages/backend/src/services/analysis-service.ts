@@ -46,7 +46,8 @@ interface AnalysisStep extends AnalysisStepConfig {
   outputPrefix: string;
 }
 
-const ANALYSIS_STEPS: AnalysisStep[] = [
+// 导出 ANALYSIS_STEPS 常量供前端使用
+export const ANALYSIS_STEPS: AnalysisStep[] = [
   {
     id: 1,
     name: '架构分析',
@@ -147,7 +148,7 @@ export class AnalysisService {
   }
 
   // 创建分析任务
-  async createTask(projectPath: string): Promise<AnalysisTask> {
+  async createTask(projectPath: string, selectedStepKeys?: string[]): Promise<AnalysisTask> {
     // 检查是否已有相同路径的任务在运行
     for (const [_, task] of tasks) {
       if (task.projectPath === projectPath && task.status === 'running') {
@@ -168,7 +169,7 @@ export class AnalysisService {
     tasks.set(taskId, task);
 
     // 异步执行分析
-    this.executeAnalysisWithClaude(taskId, projectPath).catch((error) => {
+    this.executeAnalysisWithClaude(taskId, projectPath, selectedStepKeys).catch((error) => {
       console.error('Analysis execution error:', error);
     });
 
@@ -378,7 +379,7 @@ export class AnalysisService {
   }
 
   // 使用 Claude Code 执行分析
-  private async executeAnalysisWithClaude(taskId: string, projectPath: string): Promise<void> {
+  private async executeAnalysisWithClaude(taskId: string, projectPath: string, selectedStepKeys?: string[]): Promise<void> {
     // 检查是否有其他任务正在运行
     if (runningTasks.size > 0) {
       this.updateTask(taskId, { status: 'pending', progress: 0, currentStep: '等待其他任务完成...' });
@@ -456,30 +457,121 @@ export class AnalysisService {
         // 测试失败不中断流程，继续执行
       }
 
-      // 步骤 4: 并行执行前 6 个分析步骤（3 个 Claude 进程，每批 2 个步骤）
-      const totalSteps = ANALYSIS_STEPS.length;
-      const parallelSteps = ANALYSIS_STEPS.slice(0, 6); // 前 6 步并行
-      const finalStep = ANALYSIS_STEPS[6]; // 第 7 步单独执行
+      // 根据选择的步骤执行分析
+      const stepsToExecute = selectedStepKeys
+        ? ANALYSIS_STEPS.filter(step => selectedStepKeys.includes(step.key))
+        : ANALYSIS_STEPS; // 默认执行所有步骤
 
-      this.updateTask(taskId, {
-        progress: 20,
-        currentStep: '并行执行分析步骤 (1-6)...',
-      });
+      if (stepsToExecute.length === 0) {
+        throw new Error('未选择任何分析步骤');
+      }
 
-      sendSSE(taskId, {
-        type: 'batch_start',
-        taskId,
-        data: { batchName: '并行分析步骤', steps: parallelSteps.map(s => s.name) },
-      });
+      // 检查是否有依赖步骤（第 7 步需要前面的步骤结果）
+      const hasRefactorStep = stepsToExecute.some(s => s.key === 'refactor_suggestions');
+      const hasPreviousSteps = stepsToExecute.some(s => s.id >= 1 && s.id <= 6);
 
-      // 并行执行前 6 个步骤
-      const parallelPromises = parallelSteps.map(async (step) => {
-        sendSSE(taskId, {
-          type: 'step_start',
-          taskId,
-          data: { stepId: step.id, stepKey: step.key, stepName: step.name },
+      if (hasRefactorStep && !hasPreviousSteps) {
+        throw new Error('重构与改进建议需要至少一个分析步骤的结果');
+      }
+
+      // 分离并行步骤和顺序步骤
+      // 并行执行步骤 1-6，步骤 7 必须单独执行（依赖前面结果）
+      const parallelSteps = stepsToExecute.filter(s => s.id >= 1 && s.id <= 6);
+      const sequentialSteps = stepsToExecute.filter(s => s.id === 7);
+
+      const totalSteps = stepsToExecute.length;
+      let completedSteps = 0;
+
+      if (parallelSteps.length > 0) {
+        this.updateTask(taskId, {
+          progress: 20,
+          currentStep: `执行分析步骤 (1-${parallelSteps.length}并行)...`,
         });
 
+        sendSSE(taskId, {
+          type: 'batch_start',
+          taskId,
+          data: { batchName: '分析步骤', steps: parallelSteps.map(s => s.name) },
+        });
+
+        // 并行执行步骤
+        const parallelPromises = parallelSteps.map(async (step) => {
+          sendSSE(taskId, {
+            type: 'step_start',
+            taskId,
+            data: { stepId: step.id, stepKey: step.key, stepName: step.name },
+          });
+
+          try {
+            const fullPrompt = `${step.prompt}。请将分析报告以 Markdown 格式输出。`;
+            const stepOutputPath = path.join(
+              projectOutputDir,
+              `${step.name}.md`
+            );
+
+            console.log(`[Analysis] 执行步骤 ${step.id}: ${step.name}`);
+            await claude.run(projectPath, fullPrompt, {
+              timeout: 10 * 60 * 1000,
+              outputFile: stepOutputPath,
+            });
+
+            console.log(`[Analysis] 步骤 ${step.id} 完成，报告已保存：${stepOutputPath}`);
+
+            // 读取生成的文档内容
+            let content = '';
+            try {
+              content = await fs.readFile(stepOutputPath, 'utf-8');
+            } catch (readError) {
+              console.error(`Failed to read step output: ${stepOutputPath}`, readError);
+            }
+
+            completedSteps++;
+            const stepProgress = 20 + (completedSteps / totalSteps) * 60;
+
+            this.updateTask(taskId, {
+              progress: Math.round(stepProgress),
+              currentStep: `完成步骤 ${step.id}: ${step.name}`,
+            });
+
+            sendSSE(taskId, {
+              type: 'step_complete',
+              taskId,
+              data: {
+                stepId: step.id,
+                stepKey: step.key,
+                stepName: step.name,
+                outputPath: stepOutputPath,
+                content: content,
+              },
+            });
+
+            return { success: true, step };
+          } catch (stepError: any) {
+            console.error(`Step ${step.name} failed:`, stepError.message);
+            sendSSE(taskId, {
+              type: 'step_error',
+              taskId,
+              data: { stepId: step.id, stepKey: step.key, stepName: step.name, error: stepError.message },
+            });
+            return { success: false, step, error: stepError.message };
+          }
+        });
+
+        // 等待所有并行步骤完成
+        const parallelResults = await Promise.all(parallelPromises);
+        const successCount = parallelResults.filter(r => r.success).length;
+        console.log(`[Analysis] 并行步骤完成：${successCount}/${parallelSteps.length} 成功`);
+
+        if (sequentialSteps.length > 0) {
+          this.updateTask(taskId, {
+            progress: 80,
+            currentStep: `并行步骤完成 (${successCount}/${parallelSteps.length})，执行后续步骤...`,
+          });
+        }
+      }
+
+      // 执行顺序步骤（第 7 步：重构与改进建议）
+      for (const step of sequentialSteps) {
         try {
           const fullPrompt = `${step.prompt}。请将分析报告以 Markdown 格式输出。`;
           const stepOutputPath = path.join(
@@ -503,8 +595,9 @@ export class AnalysisService {
             console.error(`Failed to read step output: ${stepOutputPath}`, readError);
           }
 
-          // 更新任务进度
-          const stepProgress = 20 + (step.id / 6) * 60; // 20% ~ 80%
+          completedSteps++;
+          const stepProgress = 20 + (completedSteps / totalSteps) * 60;
+
           this.updateTask(taskId, {
             progress: Math.round(stepProgress),
             currentStep: `完成步骤 ${step.id}: ${step.name}`,
@@ -521,8 +614,6 @@ export class AnalysisService {
               content: content,
             },
           });
-
-          return { success: true, step };
         } catch (stepError: any) {
           console.error(`Step ${step.name} failed:`, stepError.message);
           sendSSE(taskId, {
@@ -530,71 +621,10 @@ export class AnalysisService {
             taskId,
             data: { stepId: step.id, stepKey: step.key, stepName: step.name, error: stepError.message },
           });
-          return { success: false, step, error: stepError.message };
         }
-      });
-
-      // 等待所有并行步骤完成
-      const parallelResults = await Promise.all(parallelPromises);
-      const successCount = parallelResults.filter(r => r.success).length;
-      console.log(`[Analysis] 并行步骤完成：${successCount}/${parallelSteps.length} 成功`);
-
-      this.updateTask(taskId, {
-        progress: 80,
-        currentStep: `并行步骤完成 (${successCount}/${parallelSteps.length})，执行最后一步...`,
-      });
-
-      // 执行第 7 步（依赖于前面的分析结果）
-      try {
-        const fullPrompt = `${finalStep.prompt}。请将分析报告以 Markdown 格式输出。`;
-        const stepOutputPath = path.join(
-          projectOutputDir,
-          `${finalStep.name}.md`
-        );
-
-        console.log(`[Analysis] 执行步骤 ${finalStep.id}: ${finalStep.name}`);
-        await claude.run(projectPath, fullPrompt, {
-          timeout: 10 * 60 * 1000,
-          outputFile: stepOutputPath,
-        });
-
-        console.log(`[Analysis] 步骤 ${finalStep.id} 完成，报告已保存：${stepOutputPath}`);
-
-        // 读取生成的文档内容
-        let content = '';
-        try {
-          content = await fs.readFile(stepOutputPath, 'utf-8');
-        } catch (readError) {
-          console.error(`Failed to read step output: ${stepOutputPath}`, readError);
-        }
-
-        // 更新任务进度 - 第 7 步完成
-        this.updateTask(taskId, {
-          progress: 85,
-          currentStep: `完成步骤 ${finalStep.id}: ${finalStep.name}`,
-        });
-
-        sendSSE(taskId, {
-          type: 'step_complete',
-          taskId,
-          data: {
-            stepId: finalStep.id,
-            stepKey: finalStep.key,
-            stepName: finalStep.name,
-            outputPath: stepOutputPath,
-            content: content,
-          },
-        });
-      } catch (stepError: any) {
-        console.error(`Step ${finalStep.name} failed:`, stepError.message);
-        sendSSE(taskId, {
-          type: 'step_error',
-          taskId,
-          data: { stepId: finalStep.id, stepKey: finalStep.key, stepName: finalStep.name, error: stepError.message },
-        });
       }
 
-      // 步骤 4: 生成汇总报告
+      // 生成汇总报告
       this.updateTask(taskId, {
         progress: 90,
         currentStep: '生成汇总报告...',

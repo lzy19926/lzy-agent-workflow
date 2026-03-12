@@ -1,13 +1,14 @@
-import React, { useState, useCallback, useRef } from 'react';
-import { Button, Input, Space, Card, Typography, Alert, Tag, Row, Col, Statistic } from 'antd';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { Button, Input, Space, Card, Typography, Alert, Tag, Row, Col, Statistic, Checkbox, Divider } from 'antd';
+import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { FolderOutlined, FileTextOutlined, CodeOutlined, BuildOutlined } from '@ant-design/icons';
-import { analyzeApi, ProjectInfo } from '@/api/analyze';
+import { analyzeApi, ProjectInfo, AnalysisStepConfig } from '@/api/analyze';
 
 const { Text } = Typography;
 
 interface ProjectSelectorProps {
   onProjectSelected: (projectPath: string, info: ProjectInfo) => void;
-  onAnalyze: (projectPath: string) => void;
+  onAnalyze: (projectPath: string, selectedStepKeys?: string[]) => void;
   isLoading: boolean;
 }
 
@@ -20,6 +21,9 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
   const [isValidating, setIsValidating] = useState(false);
   const [projectInfo, setProjectInfo] = useState<ProjectInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [analysisSteps, setAnalysisSteps] = useState<AnalysisStepConfig[]>([]);
+  const [selectedStepKeys, setSelectedStepKeys] = useState<string[]>([]);
+  const [showStepSelector, setShowStepSelector] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 触发文件夹选择
@@ -66,12 +70,20 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
     setIsValidating(true);
     setError(null);
     setProjectInfo(null);
+    setShowStepSelector(false);
+    setSelectedStepKeys([]);
 
     try {
       const result = await analyzeApi.validateProject(projectPath);
       if (result.valid && result.info) {
         setProjectInfo(result.info);
         onProjectSelected(projectPath, result.info);
+        // 验证成功后显示分析步骤选择器，使用返回的 steps
+        if (result.steps && result.steps.length > 0) {
+          setAnalysisSteps(result.steps);
+          setShowStepSelector(true);
+          setSelectedStepKeys(result.steps.map(s => s.key));
+        }
       } else {
         setError(result.error || '无效的项目目录');
       }
@@ -85,9 +97,18 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
   // 开始分析
   const handleAnalyze = useCallback(() => {
     if (projectInfo) {
-      onAnalyze(projectPath);
+      onAnalyze(projectPath, selectedStepKeys.length > 0 ? selectedStepKeys : undefined);
     }
-  }, [projectInfo, projectPath, onAnalyze]);
+  }, [projectInfo, projectPath, onAnalyze, selectedStepKeys]);
+
+  // 全选/取消全选
+  const handleSelectAll = useCallback((e: CheckboxChangeEvent) => {
+    if (e.target.checked) {
+      setSelectedStepKeys(analysisSteps.map(s => s.key));
+    } else {
+      setSelectedStepKeys([]);
+    }
+  }, [analysisSteps]);
 
   return (
     <Card title="选择代码工程项目" style={{ marginBottom: 24 }}>
@@ -182,15 +203,82 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
               ))}
             </Space>
           </div>
+
+          <Divider style={{ margin: '16px 0' }} />
+
+          {showStepSelector && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <Text strong>选择分析步骤</Text>
+                <Checkbox checked={selectedStepKeys.length === analysisSteps.length} onChange={handleSelectAll}>
+                  全选
+                </Checkbox>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {analysisSteps.map((step) => (
+                  <Card
+                    key={step.key}
+                    size="small"
+                    hoverable
+                    style={{
+                      cursor: 'pointer',
+                      border: '1px solid',
+                      borderColor: selectedStepKeys.includes(step.key) ? '#1890ff' : '#d9d9d9',
+                      background: selectedStepKeys.includes(step.key) ? '#e6f7ff' : '#fafafa',
+                    }}
+                    onClick={() => {
+                      if (selectedStepKeys.includes(step.key)) {
+                        setSelectedStepKeys(selectedStepKeys.filter(k => k !== step.key));
+                      } else {
+                        setSelectedStepKeys([...selectedStepKeys, step.key]);
+                      }
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                      <Checkbox
+                        checked={selectedStepKeys.includes(step.key)}
+                        onChange={() => {}}
+                        style={{ pointerEvents: 'none', marginTop: '4px' }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                          <Tag color="blue" style={{ fontSize: '12px', fontWeight: 'bold' }}>Step{step.id}</Tag>
+                          <Text strong style={{ fontSize: '14px' }}>{step.name}</Text>
+                        </div>
+                        <div style={{ fontSize: '13px', color: '#666' }}>
+                          {step.description}
+                        </div>
+                      </div>
+                      {step.skill && (
+                        <Tag color="green" style={{ fontSize: '12px', height: 'fit-content' }}>
+                          {step.skill}
+                        </Tag>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+              {selectedStepKeys.length === 0 && (
+                <Alert
+                  message="请至少选择一个分析步骤"
+                  type="warning"
+                  showIcon
+                  style={{ marginTop: 12 }}
+                />
+              )}
+            </div>
+          )}
+
           <div style={{ marginTop: 16 }}>
             <Button
               type="primary"
               size="large"
               onClick={handleAnalyze}
               loading={isLoading}
+              disabled={selectedStepKeys.length === 0}
               block
             >
-              开始分析
+              开始分析 ({selectedStepKeys.length} 个步骤)
             </Button>
           </div>
         </Card>
