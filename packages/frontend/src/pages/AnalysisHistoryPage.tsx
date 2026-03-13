@@ -177,8 +177,8 @@ const AnalysisHistoryPage: React.FC = () => {
       key: 'projectName',
       render: (name: string, record: TaskRecord) => (
         <div>
-          <div style={{ fontWeight: 500 }}>{name || '未知项目'}</div>
-          <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>{record.projectPath}</div>
+          <div className="font-medium">{name || '未知项目'}</div>
+          <div className="text-xs text-gray-400 mt-1">{record.projectPath}</div>
         </div>
       ),
     },
@@ -245,45 +245,43 @@ const AnalysisHistoryPage: React.FC = () => {
   ];
 
   return (
-    <>
-      <div>
-        <Card
-          title={
-            <Space>
-              <Title level={4} style={{ margin: 0 }}>代码分析历史记录</Title>
-            </Space>
-          }
-          extra={
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={loadTasks}
-              loading={loading}
-            >
-              刷新
-            </Button>
-          }
-        >
-          {tasks.length === 0 ? (
-            <Empty
-              description="暂无分析历史记录"
-              style={{ padding: '60px 0' }}
-            />
-          ) : (
-            <Table
-              columns={columns}
-              dataSource={tasks}
-              rowKey="taskId"
-              loading={loading}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showTotal: (total) => `共 ${total} 条`,
-              }}
-            />
-          )}
-        </Card>
-      </div>
-    </>
+    <div>
+      <Card
+        title={
+          <Space>
+            <Title level={4} className="!m-0">代码分析历史记录</Title>
+          </Space>
+        }
+        extra={
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={loadTasks}
+            loading={loading}
+          >
+            刷新
+          </Button>
+        }
+      >
+        {tasks.length === 0 ? (
+          <Empty
+            description="暂无分析历史记录"
+            className="py-15"
+          />
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={tasks}
+            rowKey="taskId"
+            loading={loading}
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showTotal: (total) => `共 ${total} 条`,
+            }}
+          />
+        )}
+      </Card>
+    </div>
   );
 };
 

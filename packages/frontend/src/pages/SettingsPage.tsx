@@ -29,24 +29,41 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div>
-      <Card title="设置" style={{ marginTop: 24, maxWidth: 600 }}>
+      <Card
+        title="设置"
+        className="mt-6 max-w-2xl"
+      >
         <Form
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
         >
+          {/* API Key 输入 */}
           <Form.Item
             label="阿里云 API Key"
             name="apiKey"
             rules={[{ required: true, message: '请输入 API Key' }]}
+            className="mb-4"
           >
             <Input.Password placeholder="sk-xxxxxxxxxxxxxxxx" />
           </Form.Item>
-          <Form.Item label="输出目录" name="outputDir">
+
+          {/* 输出目录输入 */}
+          <Form.Item
+            label="输出目录"
+            name="outputDir"
+            className="mb-4"
+          >
             <Input placeholder="./output" />
           </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" icon={<SaveOutlined />}>
+
+          {/* 保存按钮 */}
+          <Form.Item className="mb-0">
+            <Button
+              type="primary"
+              htmlType="submit"
+              icon={<SaveOutlined />}
+            >
               保存配置
             </Button>
           </Form.Item>

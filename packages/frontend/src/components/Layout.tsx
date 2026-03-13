@@ -45,21 +45,34 @@ const Layout: React.FC = () => {
   };
 
   return (
-    <AntLayout style={{ minHeight: '100vh' }}>
-      <Header style={{ display: 'flex', alignItems: 'center' }}>
-        <div style={{ color: 'white', fontSize: 20, marginRight: 24 }}>
+    <AntLayout className="min-h-screen">
+      {/* Header - 使用 Tailwind 的 flex 布局类 */}
+      <Header className="flex items-center justify-between px-6 py-0 bg-black/80">
+        {/* Logo 区域 */}
+        <div className="text-white text-2xl font-bold mr-6">
           VideoMemo
         </div>
+
+        {/* 导航菜单 - 使用 Tailwind 的 flex-1 和 min-w-0 */}
         <Menu
           theme="dark"
           mode="horizontal"
           items={menuItems}
           selectedKeys={[location.pathname]}
           onClick={handleMenuClick}
-          style={{ flex: 1, minWidth: 0 }}
+          className="flex-1 min-w-0"
+          style={{ flex: '1 1 0%' }}
         />
       </Header>
-      <Content style={{ padding: '24px 48px', background: colorBgContainer, borderRadius: borderRadiusLG, margin: '16px 48px' }}>
+
+      {/* Content - 使用 Tailwind 的间距和背景色类 */}
+      <Content
+        className="m-4 p-6"
+        style={{
+          background: colorBgContainer,
+          borderRadius: borderRadiusLG,
+        }}
+      >
         <Outlet />
       </Content>
     </AntLayout>

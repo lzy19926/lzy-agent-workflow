@@ -36,16 +36,29 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
-      <Card title="视频解析" style={{ marginTop: 24 }}>
-        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-          <PlayCircleOutlined style={{ fontSize: 64, color: '#1890ff', marginBottom: 24 }} />
-          <h2 style={{ marginBottom: 32 }}>输入视频 URL 开始解析</h2>
+    <div className="max-w-4xl mx-auto">
+      <Card
+        title="视频解析"
+        className="mt-6"
+      >
+        {/* 内容区域 - 使用 Tailwind 的文本和间距类 */}
+        <div className="text-center py-10">
+          {/* 图标 - 使用 Tailwind 的尺寸和颜色类 */}
+          <PlayCircleOutlined
+            className="text-6xl text-blue-500 mb-6 block"
+          />
+
+          {/* 标题 - 使用 Tailwind 的排版类 */}
+          <h2 className="text-2xl font-medium mb-8 text-center">
+            输入视频 URL 开始解析
+          </h2>
+
+          {/* 表单 - 使用 Tailwind 的 flex 布局类 */}
           <Form
             form={form}
             onFinish={handleSubmit}
             layout="inline"
-            style={{ justifyContent: 'center', gap: 12 }}
+            className="flex justify-center gap-3"
           >
             <Form.Item
               name="videoUrl"
@@ -54,10 +67,18 @@ const HomePage: React.FC = () => {
                 { pattern: /^https?:\/\/.+/, message: '请输入有效的 URL' },
               ]}
             >
-              <Input placeholder="https://www.bilibili.com/video/..." style={{ width: 500 }} />
+              <Input
+                placeholder="https://www.bilibili.com/video/..."
+                className="w-[500px]"
+              />
             </Form.Item>
             <Form.Item>
-              <Button type="primary" htmlType="submit" loading={loading} size="large">
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                size="large"
+              >
                 开始解析
               </Button>
             </Form.Item>

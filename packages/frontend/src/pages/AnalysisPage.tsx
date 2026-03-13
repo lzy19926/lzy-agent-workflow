@@ -1,12 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Typography, Space } from 'antd';
 import { useSearchParams } from 'react-router-dom';
 import ProjectSelector from '@/components/ProjectSelector';
 import AnalysisStatus from '@/components/AnalysisStatus';
 import { analyzeApi, ProjectInfo, AnalysisStepConfig } from '@/api/analyze';
 import { saveTask, getTaskByTaskId } from '@/db/analysisStore';
-
-const { Title, Text } = Typography;
 
 const AnalysisPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -88,27 +85,33 @@ const AnalysisPage: React.FC = () => {
   }, []);
 
   return (
-    <div>
-      <Space direction="vertical" style={{ width: '100%' }} size="large">
-        <div>
-          <Title level={2}>代码项目分析</Title>
-          <Text type="secondary">
-            选择一个代码工程项目目录，通过 Claude Code 进行系统性分析，生成结构化报告。
-          </Text>
-        </div>
+    <div className="w-full">
+      {/* 页面标题区域 - 使用 Tailwind 的间距和排版类 */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-semibold mb-2 text-gray-800">
+          代码项目分析
+        </h1>
+        <p className="text-gray-500">
+          选择一个代码工程项目目录，通过 Claude Code 进行系统性分析，生成结构化报告。
+        </p>
+      </div>
 
-        {!taskId && (
-          <ProjectSelector
-            onProjectSelected={handleProjectSelected}
-            onAnalyze={handleAnalyze}
-            isLoading={isLoading}
-          />
-        )}
+      {/* 根据任务状态显示不同组件 */}
+      {!taskId && (
+        <ProjectSelector
+          onProjectSelected={handleProjectSelected}
+          onAnalyze={handleAnalyze}
+          isLoading={isLoading}
+        />
+      )}
 
-        {taskId && (
-          <AnalysisStatus taskId={taskId} steps={analysisSteps} onComplete={handleComplete} />
-        )}
-      </Space>
+      {taskId && (
+        <AnalysisStatus
+          taskId={taskId}
+          steps={analysisSteps}
+          onComplete={handleComplete}
+        />
+      )}
     </div>
   );
 };

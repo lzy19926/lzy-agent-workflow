@@ -111,19 +111,20 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
   }, [analysisSteps]);
 
   return (
-    <Card title="选择代码工程项目" style={{ marginBottom: 24 }}>
+    <Card title="选择代码工程项目" className="mb-6">
       {/* 隐藏的文件输入，用于选择目录 */}
       <input
         type="file"
         // @ts-ignore - webkitdirectory 是 HTML5 非标准但广泛支持的属性
         webkitdirectory=""
         directory=""
-        style={{ display: 'none' }}
+        className="hidden"
         ref={fileInputRef}
         onChange={handleFileChange}
       />
 
-      <Space.Compact style={{ width: '100%', marginBottom: 16 }}>
+      {/* 路径输入区域 - 使用 Tailwind 的 flex 和间距类 */}
+      <Space.Compact className="w-full mb-4">
         <Input
           id="project-path-input"
           placeholder="请输入项目目录路径，例如：C:/Users/username/my-project"
@@ -131,7 +132,7 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
           onChange={(e) => setProjectPath(e.target.value)}
           onPressEnter={handleValidate}
           disabled={isLoading}
-          style={{ flex: 1 }}
+          className="flex-1"
         />
         <Button
           icon={<FolderOutlined />}
@@ -150,22 +151,25 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
         </Button>
       </Space.Compact>
 
+      {/* 错误提示 - 使用 Tailwind 的间距类 */}
       {error && (
         <Alert
           message="验证失败"
           description={error}
           type={error.includes('提示') ? 'warning' : 'error'}
           showIcon
-          style={{ marginBottom: 16 }}
+          className="mb-4"
         />
       )}
 
+      {/* 项目信息预览卡片 */}
       {projectInfo && (
         <Card
           size="small"
           title="项目信息预览"
-          style={{ background: '#f6ffed', borderColor: '#b7eb8f' }}
+          className="bg-green-50 border-green-200"
         >
+          {/* 项目统计信息 */}
           <Row gutter={16}>
             <Col span={6}>
               <Statistic
@@ -195,37 +199,35 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
               />
             </Col>
           </Row>
-          <div style={{ marginTop: 12 }}>
-            <Text type="secondary">技术栈：</Text>
-            <Space wrap style={{ marginTop: 8 }}>
+
+          {/* 技术栈标签 */}
+          <div className="mt-3">
+            <Text className="text-gray-500 mr-2">技术栈：</Text>
+            <Space wrap className="mt-2">
               {projectInfo.techStack.map((tech: string) => (
                 <Tag key={tech} color="blue">{tech}</Tag>
               ))}
             </Space>
           </div>
 
-          <Divider style={{ margin: '16px 0' }} />
+          <Divider className="my-4" />
 
+          {/* 分析步骤选择器 */}
           {showStepSelector && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div className="flex justify-between items-center mb-3">
                 <Text strong>选择分析步骤</Text>
                 <Checkbox checked={selectedStepKeys.length === analysisSteps.length} onChange={handleSelectAll}>
                   全选
                 </Checkbox>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+
+              <div className="flex flex-col gap-3">
                 {analysisSteps.map((step) => (
                   <Card
                     key={step.key}
                     size="small"
                     hoverable
-                    style={{
-                      cursor: 'pointer',
-                      border: '1px solid',
-                      borderColor: selectedStepKeys.includes(step.key) ? '#1890ff' : '#d9d9d9',
-                      background: selectedStepKeys.includes(step.key) ? '#e6f7ff' : '#fafafa',
-                    }}
                     onClick={() => {
                       if (selectedStepKeys.includes(step.key)) {
                         setSelectedStepKeys(selectedStepKeys.filter(k => k !== step.key));
@@ -233,24 +235,31 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
                         setSelectedStepKeys([...selectedStepKeys, step.key]);
                       }
                     }}
+                    className={`
+                      cursor-pointer border transition-colors
+                      ${selectedStepKeys.includes(step.key)
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-300 bg-gray-50'
+                      }
+                    `}
                   >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                    <div className="flex items-start gap-3">
                       <Checkbox
                         checked={selectedStepKeys.includes(step.key)}
                         onChange={() => {}}
-                        style={{ pointerEvents: 'none', marginTop: '4px' }}
+                        className="pointer-events-none mt-1"
                       />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                          <Tag color="blue" style={{ fontSize: '12px', fontWeight: 'bold' }}>Step{step.id}</Tag>
-                          <Text strong style={{ fontSize: '14px' }}>{step.name}</Text>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Tag color="blue" className="text-xs font-bold">Step{step.id}</Tag>
+                          <Text strong className="text-base">{step.name}</Text>
                         </div>
-                        <div style={{ fontSize: '13px', color: '#666' }}>
+                        <div className="text-sm text-gray-500">
                           {step.description}
                         </div>
                       </div>
                       {step.skill && (
-                        <Tag color="green" style={{ fontSize: '12px', height: 'fit-content' }}>
+                        <Tag color="green" className="text-xs h-fit">
                           {step.skill}
                         </Tag>
                       )}
@@ -258,18 +267,20 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
                   </Card>
                 ))}
               </div>
+
               {selectedStepKeys.length === 0 && (
                 <Alert
                   message="请至少选择一个分析步骤"
                   type="warning"
                   showIcon
-                  style={{ marginTop: 12 }}
+                  className="mt-3"
                 />
               )}
             </div>
           )}
 
-          <div style={{ marginTop: 16 }}>
+          {/* 开始分析按钮 */}
+          <div className="mt-4">
             <Button
               type="primary"
               size="large"

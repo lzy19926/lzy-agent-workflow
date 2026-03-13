@@ -41,7 +41,7 @@ const HistoryPage: React.FC = () => {
         const urlDisplay = record.videoUrl.length > 50
           ? record.videoUrl.slice(0, 50) + '...'
           : record.videoUrl;
-        return <span style={{ color: '#999' }}>{urlDisplay}</span>;
+        return <span className="text-gray-400">{urlDisplay}</span>;
       },
     },
     {
@@ -91,7 +91,10 @@ const HistoryPage: React.FC = () => {
 
   return (
     <div>
-      <Card title="历史记录" style={{ marginTop: 24 }}>
+      <Card
+        title="历史记录"
+        className="mt-6"
+      >
         <Table
           columns={columns}
           dataSource={tasks}

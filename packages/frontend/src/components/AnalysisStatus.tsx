@@ -113,13 +113,13 @@ const AnalysisStatus: React.FC<AnalysisStatusProps> = ({ taskId, steps, onComple
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending':
-        return <LoadingOutlined spin style={{ color: '#1890ff' }} />;
+        return <LoadingOutlined spin className="text-blue-500" />;
       case 'running':
-        return <LoadingOutlined spin style={{ color: '#faad14' }} />;
+        return <LoadingOutlined spin className="text-yellow-500" />;
       case 'completed':
-        return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
+        return <CheckCircleOutlined className="text-green-500" />;
       case 'failed':
-        return <CloseCircleOutlined style={{ color: '#ff4d4f' }} />;
+        return <CloseCircleOutlined className="text-red-500" />;
       default:
         return null;
     }
@@ -186,21 +186,21 @@ const AnalysisStatus: React.FC<AnalysisStatusProps> = ({ taskId, steps, onComple
     }
   };
 
-  // Markdown 自定义渲染组件
+  // Markdown 自定义渲染组件 - 使用 Tailwind 类
   const markdownComponents = {
     table: ({ node, ...props }: any) => (
-      <div style={{ overflowX: 'auto', marginBottom: '16px' }}>
-        <table style={{ borderCollapse: 'collapse', width: '100%' }} {...props} />
+      <div className="overflow-x-auto mb-4">
+        <table className="border-collapse w-full border border-gray-300" {...props} />
       </div>
     ),
     th: ({ node, ...props }: any) => (
-      <th style={{ border: '1px solid #d0d0d0', padding: '8px 12px', background: '#f6f8fa', fontWeight: 600, textAlign: 'left' }} {...props} />
+      <th className="border border-gray-300 px-3 py-2 bg-gray-50 font-semibold text-left" {...props} />
     ),
     td: ({ node, ...props }: any) => (
-      <td style={{ border: '1px solid #d0d0d0', padding: '8px 12px' }} {...props} />
+      <td className="border border-gray-300 px-3 py-2" {...props} />
     ),
     pre: ({ node, ...props }: any) => (
-      <pre style={{ margin: '16px 0', borderRadius: '6px', overflow: 'auto', background: '#f6f8fa', padding: '16px' }}>
+      <pre className="my-4 mx-0 p-4 rounded overflow-auto bg-gray-50" {...props}>
         {props.children}
       </pre>
     ),
@@ -223,11 +223,11 @@ const AnalysisStatus: React.FC<AnalysisStatusProps> = ({ taskId, steps, onComple
         key: step.key,
         color: isCompleted ? 'green' : 'blue',
         children: (
-          <Space direction="vertical" size="small" style={{ width: '100%' }}>
+          <Space direction="vertical" className="w-full" size="small">
             <div>
               <Text strong>步骤 {step.id}: {step.name}</Text>
               {isCompleted && (
-                <Tag color="green" style={{ marginLeft: 8 }}>完成</Tag>
+                <Tag color="green" className="ml-2">完成</Tag>
               )}
             </div>
             <Text type="secondary">{step.description}</Text>
@@ -237,14 +237,14 @@ const AnalysisStatus: React.FC<AnalysisStatusProps> = ({ taskId, steps, onComple
                 size="small"
                 icon={<FileTextOutlined />}
                 onClick={() => handleViewDoc(step.key)}
-                style={{ padding: 0, marginTop: 4 }}
+                className="!p-0 !mt-1"
               >
                 查看文档
               </Button>
             )}
           </Space>
         ),
-        dot: isCompleted ? <CheckCircleOutlined style={{ color: '#52c41a' }} /> : undefined,
+        dot: isCompleted ? <CheckCircleOutlined className="text-green-500" /> : undefined,
       });
     });
 
@@ -256,8 +256,8 @@ const AnalysisStatus: React.FC<AnalysisStatusProps> = ({ taskId, steps, onComple
       <Card
         title={
           <Space>
-            {task?.status === 'completed' && <CheckCircleOutlined style={{ color: '#52c41a' }} />}
-            {task?.status === 'failed' && <CloseCircleOutlined style={{ color: '#ff4d4f' }} />}
+            {task?.status === 'completed' && <CheckCircleOutlined className="text-green-500" />}
+            {task?.status === 'failed' && <CloseCircleOutlined className="text-red-500" />}
             <span>
               {task?.status === 'completed' && '分析完成'}
               {task?.status === 'failed' && '分析失败'}
@@ -274,7 +274,8 @@ const AnalysisStatus: React.FC<AnalysisStatusProps> = ({ taskId, steps, onComple
       >
         {task && (
           <>
-            <div style={{ marginBottom: 16 }}>
+            {/* 状态指示器和标签 */}
+            <div className="mb-4">
               <Space>
                 {getStatusIcon(task.status)}
                 <Tag color={getStatusColor(task.status)}>
@@ -286,6 +287,7 @@ const AnalysisStatus: React.FC<AnalysisStatusProps> = ({ taskId, steps, onComple
               </Space>
             </div>
 
+            {/* 进度条 */}
             <Progress
               percent={Math.round(calculateProgress())}
               status={
@@ -295,44 +297,43 @@ const AnalysisStatus: React.FC<AnalysisStatusProps> = ({ taskId, steps, onComple
                   ? 'success'
                   : 'active'
               }
-              style={{ marginBottom: 16 }}
+              className="mb-4"
             />
 
+            {/* 步骤时间线 */}
             <Timeline items={renderTimelineItems()} />
 
+            {/* 错误提示 */}
             {task.status === 'failed' && task.error && (
               <Alert
                 message="分析失败"
                 description={task.error}
                 type="error"
                 showIcon
-                style={{ marginTop: 16 }}
+                className="mt-4"
               />
             )}
 
+            {/* 成功提示 */}
             {task.status === 'completed' && (
               <Alert
                 message="分析完成！"
                 description="报告已生成，请查看下方内容或前往 output 目录查看原始文件。"
                 type="success"
                 showIcon
-                style={{ marginTop: 16 }}
+                className="mt-4"
               />
             )}
 
-            {/* 显示报告内容 */}
+            {/* 显示报告内容 - 使用 Tailwind 的排版和背景类 */}
             {report && (
               <div
-                style={{
-                  marginTop: 24,
-                  maxHeight: '600px',
-                  overflow: 'auto',
-                  padding: '16px',
-                  background: '#fafafa',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  lineHeight: '1.6',
-                }}
+                className="
+                  mt-6 p-4
+                  max-h-[600px] overflow-auto
+                  bg-gray-50 rounded-lg
+                  text-sm leading-relaxed
+                "
               >
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
@@ -347,7 +348,7 @@ const AnalysisStatus: React.FC<AnalysisStatusProps> = ({ taskId, steps, onComple
         )}
       </Card>
 
-      {/* 文档查看 Drawer */}
+      {/* 文档查看 Drawer - 使用 Tailwind 的布局和排版类 */}
       <Drawer
         title={viewingDoc ? `${viewingDoc.stepName} - 分析报告` : ''}
         placement="right"
@@ -362,13 +363,11 @@ const AnalysisStatus: React.FC<AnalysisStatusProps> = ({ taskId, steps, onComple
       >
         {viewingDoc && (
           <div
-            className="markdown-body"
-            style={{
-              overflow: 'auto',
-              height: '100%',
-              fontSize: '14px',
-              lineHeight: '1.6',
-            }}
+            className="
+              markdown-body
+              overflow-auto h-full
+              text-sm leading-relaxed
+            "
           >
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}

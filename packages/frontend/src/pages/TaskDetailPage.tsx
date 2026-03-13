@@ -64,7 +64,9 @@ const TaskDetailPage: React.FC = () => {
   }
 
   if (loading) {
-    return <Spin tip="加载中..." style={{ display: 'block', margin: '48px auto' }} />;
+    return (
+      <Spin tip="加载中..." className="block mx-auto my-12" />
+    );
   }
 
   if (!task) {
@@ -75,26 +77,50 @@ const TaskDetailPage: React.FC = () => {
     navigator.clipboard.writeText(text);
   };
 
+  // 标签页通用样式
+  const tabContentStyles = `
+    relative
+    [&>button]:absolute [&>button]:right-0 [&>button]:top-0
+  `;
+
   return (
     <div>
-      <Card style={{ marginBottom: 24 }}>
+      {/* 任务信息卡片 */}
+      <Card className="mb-6">
         <Descriptions title="任务信息" column={2}>
           {task.title && (
-            <Descriptions.Item label="标题" span={2}>{task.title}</Descriptions.Item>
+            <Descriptions.Item label="标题" span={2}>
+              {task.title}
+            </Descriptions.Item>
           )}
           <Descriptions.Item label="ID">{task.taskId}</Descriptions.Item>
           <Descriptions.Item label="状态">{task.status}</Descriptions.Item>
-          <Descriptions.Item label="URL" span={2}>{task.videoUrl}</Descriptions.Item>
-
+          <Descriptions.Item label="URL" span={2}>
+            {task.videoUrl}
+          </Descriptions.Item>
         </Descriptions>
+
+        {/* 进度条 */}
         {(task.status === 'processing' || task.status === 'pending') && (
-          <Progress percent={task.progress} status="active" style={{ marginTop: 16 }} />
+          <Progress
+            percent={task.progress}
+            status="active"
+            className="mt-4"
+          />
         )}
+
+        {/* 错误提示 */}
         {task.status === 'failed' && task.error && (
-          <Alert message={task.error} type="error" showIcon style={{ marginTop: 16 }} />
+          <Alert
+            message={task.error}
+            type="error"
+            showIcon
+            className="mt-4"
+          />
         )}
       </Card>
 
+      {/* 解析结果 */}
       {task.status === 'completed' && task.result && (
         <Card title="解析结果">
           <Tabs
@@ -103,15 +129,15 @@ const TaskDetailPage: React.FC = () => {
                 key: 'original',
                 label: '原始文本',
                 children: (
-                  <div>
+                  <div className={tabContentStyles}>
                     <Button
                       icon={<CopyOutlined />}
                       onClick={() => handleCopy(task.result?.text || '')}
-                      style={{ float: 'right' }}
+                      className="absolute right-0 top-0"
                     >
                       复制
                     </Button>
-                    <pre style={{ whiteSpace: 'pre-wrap', marginTop: 16 }}>
+                    <pre className="whitespace-pre-wrap mt-4">
                       {task.result.text}
                     </pre>
                   </div>
@@ -121,15 +147,15 @@ const TaskDetailPage: React.FC = () => {
                 key: 'summarized',
                 label: '整理后文本',
                 children: (
-                  <div>
+                  <div className={tabContentStyles}>
                     <Button
                       icon={<CopyOutlined />}
                       onClick={() => handleCopy(task.result?.summarizedText || '')}
-                      style={{ float: 'right' }}
+                      className="absolute right-0 top-0"
                     >
                       复制
                     </Button>
-                    <div style={{ marginTop: 16 }}>
+                    <div className="mt-4 markdown-body">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {task.result.summarizedText || ''}
                       </ReactMarkdown>
@@ -141,15 +167,15 @@ const TaskDetailPage: React.FC = () => {
                 key: 'markdown',
                 label: 'Markdown',
                 children: (
-                  <div>
+                  <div className={tabContentStyles}>
                     <Button
                       icon={<CopyOutlined />}
                       onClick={() => handleCopy(task.result?.markdown || '')}
-                      style={{ float: 'right' }}
+                      className="absolute right-0 top-0"
                     >
                       复制
                     </Button>
-                    <div style={{ marginTop: 16 }}>
+                    <div className="mt-4 markdown-body">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {task.result.markdown || ''}
                       </ReactMarkdown>
