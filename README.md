@@ -41,18 +41,31 @@
 
 ## 项目结构
 
+本项目使用 **Lerna** 进行 monorepo 管理，配合 **pnpm** 进行包管理。
+
 ```
 lzy-VideoMemo/
+├── apps/
+│   ├── frontend/        # @videomemo/frontend - React 前端应用 (Vite + Ant Design)
+│   └── backend/         # @videomemo/backend - Express 后端 API 服务
 ├── packages/
-│   ├── frontend/        # React 前端应用 (Vite + Ant Design)
-│   ├── backend/         # Express 后端 API 服务
-│   ├── core/            # 核心解析逻辑 (下载器/解析器/工具)
-│   ├── e2e/             # Playwright E2E 测试套件
-│   └── scripts/         # 启动脚本
+│   ├── core/            # @videomemo/core - 核心解析逻辑 (下载器/解析器/工具)
+│   └── e2e/             # @videomemo/e2e - Playwright E2E 测试套件
 ├── openspec/            # OpenSpec 设计文档
 ├── output/              # 解析结果输出目录
+├── lerna.json           # Lerna 配置文件
+├── pnpm-workspace.yaml  # pnpm workspace 配置
 └── README.md
 ```
+
+### 包依赖关系
+
+| 包名 | 说明 | 依赖 |
+|------|------|------|
+| `@videomemo/frontend` | React 前端应用 | 无 |
+| `@videomemo/backend` | Express 后端服务 | `@videomemo/core` |
+| `@videomemo/core` | 核心解析逻辑 | 无 |
+| `@videomemo/e2e` | Playwright E2E 测试 | 无 |
 
 ---
 
@@ -68,6 +81,28 @@ lzy-VideoMemo/
 
 ```bash
 pnpm install
+```
+
+### Lerna 常用命令
+
+```bash
+# 查看所有包
+pnpm lerna:list
+
+# 构建所有包
+pnpm build
+
+# 构建单个包
+pnpm --filter @videomemo/core build
+pnpm --filter @videomemo/backend build
+pnpm --filter @videomemo/frontend build
+
+# 清理
+pnpm clean
+
+# 版本管理
+pnpm lerna:version    # 版本预览
+pnpm lerna:publish    # 发布新版本
 ```
 
 ### 配置环境变量
@@ -93,15 +128,6 @@ ASR_API_KEY=sk-your_api_key
 ```
 
 ### 启动服务
-
-**一键启动（推荐）:**
-```bash
-# Windows
-packages\scripts\start.bat
-
-# Linux/Mac
-bash packages/scripts/start-dev.sh
-```
 
 **分别启动:**
 ```bash
@@ -239,6 +265,15 @@ GET /api/events?taskId=:id
 - [API 文档](packages/scripts/API.md)
 - [测试指南](packages/scripts/TEST_GUIDE.md)
 - [E2E 测试文档](packages/e2e/README.md)
+
+---
+
+## Lerna 配置说明
+
+`lerna.json` 配置：
+- `version: "independent"` - 使用独立版本模式，每个包独立版本号
+- `npmClient: "pnpm"` - 使用 pnpm 作为包管理器
+- `packages` - 指定 monorepo 包含的包路径（`apps/*` 和 `packages/*`）
 
 ---
 

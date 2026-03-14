@@ -2,7 +2,7 @@
   "name": "@videomemo/e2e",
   "version": "1.0.0",
   "description": "VideoMemo E2E tests with Playwright",
-  "private": true,
+  "private": false,
   "type": "module",
   "scripts": {
     "test": "playwright test",
