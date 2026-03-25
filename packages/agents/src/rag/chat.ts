@@ -5,7 +5,8 @@
  */
 
 import readline from "readline"
-import { agent, storePageData, testRetriever } from "./rag.ts"
+import { agent } from "./agent.ts"
+import { storePageData } from "./vectorStore.ts"
 import { loadJsonData } from "./dataLoader.ts"
 import path from "path"
 import { fileURLToPath } from "url"

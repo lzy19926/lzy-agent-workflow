@@ -7,7 +7,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "start": "ts-node src/rag/chat.ts"
   },
   "keywords": [],
   "author": "",
@@ -21,13 +22,17 @@
     "@langchain/community": "^1.1.24",
     "@langchain/core": "^1.0.0",
     "@langchain/langgraph": "^1.2.2",
+    "@langchain/langgraph-checkpoint-postgres": "^1.0.1",
     "@langchain/openai": "^1.3.0",
     "@langchain/textsplitters": "^1.0.1",
+    "@types/pg": "^8.20.0",
     "cheerio": "^1.0.0",
     "crawlee": "^3.16.0",
     "dotenv": "^16.6.1",
     "langchain": "^1.2.33",
     "pdf-parse": "^1.1.4",
+    "pg": "^8.20.0",
+    "pgvector": "^0.2.1",
     "playwright": "^1.58.2",
     "zod": "^4.3.6"
   }
