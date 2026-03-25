@@ -15,7 +15,7 @@
   },
   "include": [
     "./**/*.ts"
-  ],
+, "src/scripts/crawlAndStore.ts"  ],
   "exclude": [
     "node_modules",
     "dist"
