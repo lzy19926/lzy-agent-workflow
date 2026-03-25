@@ -14,8 +14,8 @@
  */
 
 import { crawlWebsite } from "./webCrawler.ts"
-import { loadJsonData } from "../rag/dataLoader.js"
-import { storePageData, textVectorStore_crawlee } from "../rag/vectorStore.js"
+import { loadJsonData } from "../rag/dataLoader.ts"
+import { storePageData, textVectorStore_crawlee } from "../rag/vectorStore.ts"
 import type { PGVectorStore } from "@langchain/community/vectorstores/pgvector"
 
 /**
@@ -56,7 +56,7 @@ export async function crawlAndStore(
   return { exportPath, itemCount, docCount: docs.length }
 }
 
-crawlAndStore("https://crawlee.dev/", textVectorStore_crawlee, 100).catch(
+crawlAndStore("https://crawlee.dev", textVectorStore_crawlee, 5).catch(
   (err) => {
     console.error("❌ 爬取和存储过程中发生错误：", err)
   }
