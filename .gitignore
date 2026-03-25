@@ -19,3 +19,8 @@ cache/*
 .bin
 .vscode
 .idea
+.mcp.json
+
+
+# 内部缓存文件
+storage/

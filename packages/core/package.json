@@ -4,13 +4,9 @@
   "description": "VideoMemo core video parsing functionality",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "bin": {
-    "claude-code-analyze": "./dist/tools/claude-cli/index.js"
-  },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch",
-    "claude-analyze": "ts-node src/tools/claude-cli/index.ts"
+    "dev": "tsc --watch"
   },
   "keywords": [],
   "author": "",

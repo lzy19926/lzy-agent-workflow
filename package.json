@@ -14,8 +14,6 @@
     "clean": "lerna clean",
     "lerna:publish": "lerna publish",
     "lerna:version": "lerna version",
-    "lerna:bootstrap": "lerna bootstrap",
-    "lerna:link": "lerna link",
     "lerna:list": "lerna list"
   },
   "keywords": [
