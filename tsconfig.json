@@ -11,6 +11,6 @@
     "outDir": "./dist",
     "rootDir": "."
   },
-  "include": ["./**/*.ts", "packages/agents/src/tools/webCrawler.js"],
+  "include": ["./**/*.ts", "packages/agents/src/scripts/webCrawler.js"],
   "exclude": ["node_modules", "dist"]
 }

@@ -24,3 +24,4 @@ cache/*
 
 # 内部缓存文件
 storage/
+crawlee_storage/

@@ -1,6 +1,6 @@
 import { PostgresStore } from "@langchain/langgraph-checkpoint-postgres/store"
 import { Pool } from "pg"
-import { loadEnv, __dirname, __filename } from "./tools.ts"
+import { loadEnv } from "./env.ts"
 
 loadEnv()
 
@@ -14,7 +14,7 @@ export const pool = new Pool({
 })
 
 // 2. 初始化 PostgreSQL 存储（LangGraph Checkpoint）
-const DB_URI = process.env.POSTGRES_URI || ""
+const DB_URI = process.env.POSTGRES_URI || "postgresql://postgres:lzy19926@localhost:5432/RAG"
 
 const store = PostgresStore.fromConnString(DB_URI)
 
