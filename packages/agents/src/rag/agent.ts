@@ -1,5 +1,7 @@
 /**
- * 运行方式：ts-node .\rag.ts
+ * 运行方式：ts-node .\agent.ts
+ *
+ * Agent 模块 - 提供智能体实例
  */
 
 // ==================== 导入模块 ====================
@@ -7,12 +9,11 @@
 // LangChain 核心模块
 import { createAgent } from "langchain"
 import { ChatOpenAI } from "@langchain/openai"
-import * as z from "zod"
-import { tool } from "@langchain/core/tools"
-import { loadEnv, __dirname, __filename } from "./tools.ts"
+import { loadEnv } from "./env.ts"
 // 向量存储
 import { store } from "./postregSQL.ts"
-import { textVectorStore, testRetriever } from "./vectorStore.ts"
+// 工具
+import { tools } from "./tools.ts"
 
 loadEnv()
 
@@ -25,28 +26,6 @@ export const model = new ChatOpenAI({
     baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
   },
 })
-
-// ==================== 工具定义 ====================
-
-const retrieveSchema = z.object({ query: z.string() })
-
-export const retrieve = tool<any>(
-  async ({ query }: any) => {
-    const retrievedDocs = await textVectorStore.similaritySearch(query, 2)
-    const serialized = retrievedDocs
-      .map((doc) => `来源：${doc.metadata.source}\n内容：${doc.pageContent}`)
-      .join("\n")
-    return [serialized, retrievedDocs]
-  },
-  {
-    name: "retrieve",
-    description: "检索与查询相关的信息。",
-    schema: retrieveSchema,
-    responseFormat: "content_and_artifact",
-  }
-)
-
-export const tools = [retrieve]
 
 export const systemPrompt =
   "你只能使用当前检索上下文的工具来帮助用户回答问题。" +
@@ -65,5 +44,3 @@ export const agent: any = createAgent({
   tools,
   store,
 })
-
-export { testRetriever }

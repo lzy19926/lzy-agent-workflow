@@ -6,7 +6,7 @@
 
 import readline from "readline"
 import { agent } from "./agent.ts"
-import { storePageData } from "./vectorStore.ts"
+import { storePageData, textVectorStore_crawlee } from "./vectorStore.ts"
 import { loadJsonData } from "./dataLoader.ts"
 import path from "path"
 import { fileURLToPath } from "url"
@@ -48,17 +48,6 @@ async function streamAgentResponse(message: string) {
  * 主函数 - 命令行交互
  */
 async function main() {
-  // 加载 JSON 数据到向量存储
-  const allSplit = await loadJsonData(
-    path.resolve(
-      __dirname,
-      "../../storage/datasets/default/000000001.json"
-      // "../../storage/key_value_stores/default/crawled_data.json"
-    )
-  )
-
-  await storePageData(allSplit)
-
   console.log("=".repeat(50))
   console.log("欢迎使用 RAG 问答系统!")
   console.log("输入 'quit' 或 'exit' 退出")

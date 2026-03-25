@@ -108,18 +108,3 @@ export async function loadJsonData(filePath: string): Promise<Document[]> {
 
   return splits
 }
-
-// ==================== 存储函数 ====================
-
-/**
- * 将文档存储到向量库中
- * @param docs - 要存储的文档数组
- * @param vectorStore - 向量存储器实例
- */
-export async function storeData(
-  docs: Document[],
-  vectorStore: { addDocuments: (docs: Document[]) => Promise<void> }
-): Promise<void> {
-  await vectorStore.addDocuments(docs)
-  console.log(`Stored ${docs.length} documents to vector store.`)
-}
