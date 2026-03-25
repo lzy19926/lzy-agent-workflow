@@ -7,6 +7,7 @@ import { loadEnv } from "./env.ts"
 import { OpenAIEmbeddings } from "@langchain/openai"
 import { PGVectorStore } from "@langchain/community/vectorstores/pgvector"
 import { pool } from "./postregSQL.ts"
+import cliProgress from "cli-progress"
 
 loadEnv()
 // ==================== 模型配置 ====================
@@ -143,29 +144,36 @@ export async function storePageData(
 ) {
   if (!config.enabled) {
     await store.addDocuments(docs)
-    console.log(`Stored ${docs.length} documents to vector store.`)
+    console.log(`💾 Stored ${docs.length} documents to vector store.`)
     return
   }
 
   const docsToStore: any[] = []
   const duplicates: any[] = []
 
-  for (const doc of docs) {
+  // 初始化进度条
+  const progressBar = new cliProgress.SingleBar(
+    {
+      format: "💾 Storing [{bar}] {percentage}% | {value}/{total} docs | {status}",
+      clearOnComplete: false,
+    },
+    cliProgress.Presets.shades_classic
+  )
+  progressBar.start(docs.length, 0, { status: "Checking duplicates..." })
+
+  for (let i = 0; i < docs.length; i++) {
+    const doc = docs[i]
     const duplicate = await isDuplicate(doc, store, config.similarityThreshold)
 
     if (duplicate) {
-      console.log(`Duplicate found, skipping document: ${doc.metadata.source}`)
       duplicates.push(doc)
     } else {
-      console.log(
-        `Storing ${doc.metadata.source} new documents to vector store...`
-      )
       docsToStore.push(doc)
     }
+
+    progressBar.update(i + 1, { status: `Processed ${doc.metadata.source.slice(0, 30)}...` })
   }
 
-  await store.addDocuments(docsToStore)
-  console.log(
-    `Stored ${docsToStore.length} new documents, skipped ${duplicates.length} duplicates.`
-  )
+  progressBar.stop()
+  console.log(`✅ Stored ${docsToStore.length} new documents, skipped ${duplicates.length} duplicates.`)
 }
