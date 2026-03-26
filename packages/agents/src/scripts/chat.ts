@@ -5,7 +5,7 @@
  */
 
 import readline from "readline"
-import { agent } from "./agent.ts"
+import { ragAgent } from "../rag/agent.ts"
 import path from "path"
 import { fileURLToPath } from "url"
 
@@ -28,7 +28,7 @@ const rl = readline.createInterface({
 async function streamAgentResponse(message: string) {
   const agentInputs = { messages: [{ role: "user", content: message }] }
 
-  const stream = await agent.stream(agentInputs, { streamMode: "values" })
+  const stream = await ragAgent.stream(agentInputs, { streamMode: "values" })
 
   process.stdout.write("\n[Agent]: ")
   for await (const step of stream) {

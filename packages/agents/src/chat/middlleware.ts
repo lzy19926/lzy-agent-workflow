@@ -7,7 +7,7 @@
 import { RemoveMessage } from "@langchain/core/messages";
 import { createMiddleware, summarizationMiddleware as _summarizationMiddleware } from "langchain";
 import { REMOVE_ALL_MESSAGES } from "@langchain/langgraph";
-import { model } from "./model";
+import { model } from "./agent";
 
 /**
  * 消息历史修剪中间件

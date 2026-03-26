@@ -6,7 +6,7 @@
 import { loadEnv } from "./env.ts"
 import { OpenAIEmbeddings } from "@langchain/openai"
 import { PGVectorStore } from "@langchain/community/vectorstores/pgvector"
-import { pool } from "./postregSQL.ts"
+import { pool } from "./agentStore.ts"
 import cliProgress from "cli-progress"
 
 loadEnv()
