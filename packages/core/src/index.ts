@@ -14,10 +14,3 @@ export type {
   QwenAsrResult,
   QwenAsrSegment,
 } from "./llm/qwen-asr"
-
-export { QwenChat } from "./llm/qwen-chat"
-export type {
-  QwenClientConfig,
-  ChatMessage,
-  QwenResponse,
-} from "./llm/qwen-chat"
