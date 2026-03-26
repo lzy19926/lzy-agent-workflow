@@ -7,10 +7,5 @@ export * from "./FileUploadService"
 // ==================== CodeAnalysisService ====================
 export * from "./CodeAnalysisService"
 
-// ==================== LLM ====================
-export { QwenAsrParser } from "./llm/qwen-asr"
-export type {
-  QwenAsrConfig,
-  QwenAsrResult,
-  QwenAsrSegment,
-} from "./llm/qwen-asr"
+// ==================== ASRService ====================
+export * from "./ASRService"

@@ -3,7 +3,7 @@ import path from "path"
 import fs from "fs"
 import {
   VideoDownloadService,
-  QwenAsrParser,
+  ASRService,
   FileUploadService,
   QwenChat,
 } from "@videomemo/core"
@@ -171,11 +171,11 @@ async function executeTask(task: Task) {
 
     // 步骤 3: 语音识别
     console.log(`[Task ${task.id}] 语音识别：${fileUrl}`)
-    const asrParser = new QwenAsrParser({
+    const asrParser = new ASRService({
       apiKey: config.asr.apiKey,
       model: config.asr.model,
     })
-    const asrResult = await asrParser.transcribe(fileUrl)
+    const asrResult = await asrParser.transcribe(task.id, fileUrl)
     task.progress = 80
     sendSSE(task.id, {
       type: "progress",
