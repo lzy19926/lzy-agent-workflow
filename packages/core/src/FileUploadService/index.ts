@@ -9,3 +9,6 @@ export type {
   FileInfo,
   FileListItem,
 } from "./types"
+
+// ==================== 常量导出 ====================
+export { DEFAULT_CONFIG as FILE_UPLOAD_DEFAULT_CONFIG } from "./FileUploadService"

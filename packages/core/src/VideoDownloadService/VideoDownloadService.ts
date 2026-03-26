@@ -5,8 +5,10 @@ import type {
   DownloadAllResult,
   DownloaderConfig,
 } from "./types"
-import { BaseDownloader, DEFAULT_CONFIG } from "./base-downloader"
+import { DEFAULT_CONFIG } from "./types"
+import { BaseDownloader } from "./base-downloader"
 import { BilibiliDownloader } from "./bilibili-downloader"
+
 /**
  * 视频下载服务类
  * 负责初始化和管理多个平台 Downloader，根据视频链接自动选择合适的下载器

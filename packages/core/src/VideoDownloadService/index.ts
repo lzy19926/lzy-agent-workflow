@@ -19,4 +19,4 @@ export type {
 export type { BilibiliDownloaderOptions } from "./bilibili-downloader"
 
 // ==================== 常量导出 ====================
-export { DEFAULT_CONFIG } from "./base-downloader"
+export { DEFAULT_CONFIG as VIDEO_DOWNLOAD_DEFAULT_CONFIG } from "./types"

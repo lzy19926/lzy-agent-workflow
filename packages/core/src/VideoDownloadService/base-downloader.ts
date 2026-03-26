@@ -8,21 +8,6 @@ import type {
 } from "./types"
 import type { DownloaderConfig } from "./types"
 
-export const DEFAULT_CONFIG: DownloaderConfig = {
-  outputDir: "./downloads",
-  quality: "fast",
-  needVideo: false,
-  subtitleLangs: ["zh-Hans", "zh", "zh-CN", "ai-zh", "en", "en-US"],
-  platforms: {
-    bilibili: {
-      videoFormat: "mp4",
-      audioFormat: "mp3",
-      downloadCover: true,
-      fetchSubtitles: true,
-    },
-  },
-}
-
 /**
  * 平台下载器抽象基类
  * 每个视频平台（B 站、YouTube 等）需要实现自己的 Downloader
