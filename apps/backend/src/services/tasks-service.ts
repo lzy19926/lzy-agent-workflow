@@ -5,7 +5,7 @@ import {
   VideoDownloadService,
   ASRService,
   FileUploadService,
-  QwenChat,
+  QwenChatService,
 } from "@videomemo/core"
 import { sendSSE } from "./events-service"
 
@@ -195,7 +195,7 @@ async function executeTask(task: Task) {
 
     // 步骤 4: AI 整理文本
     console.log(`[Task ${task.id}] AI 整理文本`)
-    const qwenChat = new QwenChat({
+    const qwenChat = new QwenChatService({
       apiKey: config.qwen.apiKey || "",
       model: config.qwen.model || "qwen3-max",
     })
@@ -213,6 +213,7 @@ async function executeTask(task: Task) {
       : "请整理以下文本，提取摘要和关键点："
 
     const summarizedResult = await qwenChat.chatWithJson(
+      uuidv4(),
       [{ role: "user", content: asrResult.text || "" }],
       prompt
     )

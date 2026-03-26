@@ -9,3 +9,6 @@ export * from "./CodeAnalysisService"
 
 // ==================== ASRService ====================
 export * from "./ASRService"
+
+// ==================== QwenChatService ====================
+export * from "./QwenChatService"
