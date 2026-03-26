@@ -17,7 +17,7 @@ import {
   textVectorStore_crawlee,
   textVectorStore_react,
   textVectorStore_tldraw,
-} from "./vectorStore.ts"
+} from "./vectorStore"
 
 
 

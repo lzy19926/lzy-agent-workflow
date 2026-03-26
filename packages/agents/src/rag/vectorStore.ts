@@ -3,10 +3,10 @@
  * 提供文本和多模态向量存储功能
  */
 
-import { loadEnv } from "./env.ts"
+import { loadEnv } from "./env"
 import { OpenAIEmbeddings } from "@langchain/openai"
 import { PGVectorStore } from "@langchain/community/vectorstores/pgvector"
-import { pool } from "./agentStore.ts"
+import { pool } from "./agentStore"
 import cliProgress from "cli-progress"
 
 loadEnv()

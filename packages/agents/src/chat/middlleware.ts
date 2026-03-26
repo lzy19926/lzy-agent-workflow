@@ -4,10 +4,13 @@
  * 配置智能体的中间件链
  */
 
-import { RemoveMessage } from "@langchain/core/messages";
-import { createMiddleware, summarizationMiddleware as _summarizationMiddleware } from "langchain";
-import { REMOVE_ALL_MESSAGES } from "@langchain/langgraph";
-import { model } from "./agent";
+import { RemoveMessage } from "@langchain/core/messages"
+import {
+  createMiddleware,
+  summarizationMiddleware as _summarizationMiddleware,
+} from "langchain"
+import { REMOVE_ALL_MESSAGES } from "@langchain/langgraph"
+import { model } from "./agent"
 
 /**
  * 消息历史修剪中间件
@@ -29,34 +32,34 @@ import { model } from "./agent";
  * - 保持对话核心上下文（开头 + 最近内容）
  */
 export const trimMessages = createMiddleware({
-    name: "TrimMessages",
+  name: "TrimMessages",
 
-    /**
-     * 在模型调用前处理消息
-     * @param state - 当前状态，包含 messages 数组
-     * @returns 更新后的状态或 undefined（不修改）
-     */
-    beforeModel: (state) => {
-        const messages = state.messages;
+  /**
+   * 在模型调用前处理消息
+   * @param state - 当前状态，包含 messages 数组
+   * @returns 更新后的状态或 undefined（不修改）
+   */
+  beforeModel: (state) => {
+    const messages = state.messages
 
-        // 如果消息数量较少，不需要修剪
-        if (messages.length <= 3) {
-            return;
-        }
+    // 如果消息数量较少，不需要修剪
+    if (messages.length <= 3) {
+      return
+    }
 
-        const firstMsg = messages[0];
-        const recentMessages =
-            messages.length % 2 === 0 ? messages.slice(-3) : messages.slice(-4);
-        const newMessages = [firstMsg, ...recentMessages];
+    const firstMsg = messages[0]
+    const recentMessages =
+      messages.length % 2 === 0 ? messages.slice(-3) : messages.slice(-4)
+    const newMessages = [firstMsg, ...recentMessages]
 
-        return {
-            messages: [
-                new RemoveMessage({ id: REMOVE_ALL_MESSAGES }),
-                ...newMessages,
-            ],
-        };
-    },
-});
+    return {
+      messages: [
+        new RemoveMessage({ id: REMOVE_ALL_MESSAGES }),
+        ...newMessages,
+      ],
+    }
+  },
+})
 
 /**
  * 删除旧消息中间件
@@ -77,32 +80,32 @@ export const trimMessages = createMiddleware({
  * - 与 trimMessages 配合使用，实现多层次的消息管理
  */
 export const deleteOldMessages = createMiddleware({
-    name: "DeleteOldMessages",
+  name: "DeleteOldMessages",
 
-    afterModel: (state) => {
-        const messages = state.messages;
+  afterModel: (state) => {
+    const messages = state.messages
 
-        // 如果消息数量超过 2 条，删除最早的两条
-        if (messages.length > 2) {
-            return {
-                messages: messages
-                    .slice(0, 2)
-                    .map((m) => new RemoveMessage({ id: m.id! })),
-            };
-        }
-        return;
-    },
-});
+    // 如果消息数量超过 2 条，删除最早的两条
+    if (messages.length > 2) {
+      return {
+        messages: messages
+          .slice(0, 2)
+          .map((m) => new RemoveMessage({ id: m.id! })),
+      }
+    }
+    return
+  },
+})
 
 /**
  * 对话历史总结中间件
  * 自动对超长对话进行总结压缩，保留上下文并控制 token 数量
  */
-export const summarizationMiddleware = _summarizationMiddleware({
-    model,
-    trigger: { tokens: 4000 },
-    keep: { messages: 20 },
-});
+export const summarizationMiddleware: any = _summarizationMiddleware({
+  model,
+  trigger: { tokens: 4000 },
+  keep: { messages: 20 },
+})
 
 /**
  * 中间件数组
@@ -110,8 +113,8 @@ export const summarizationMiddleware = _summarizationMiddleware({
  * 当前启用的中间件：
  * - summarizationMiddleware: 自动总结长对话
  */
-export const middleware = [
-    summarizationMiddleware,
-    // trimMessages,        // 按需启用
-    // deleteOldMessages,   // 按需启用
-];
+export const middleware: any = [
+  summarizationMiddleware,
+  // trimMessages,        // 按需启用
+  // deleteOldMessages,   // 按需启用
+]

@@ -5,7 +5,7 @@
  */
 
 import readline from "readline"
-import { ragAgent } from "../rag/agent.ts"
+import { ragAgent } from "../src/rag/agent"
 import path from "path"
 import { fileURLToPath } from "url"
 

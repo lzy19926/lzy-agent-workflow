@@ -9,13 +9,17 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "outDir": "./dist",
-    "rootDir": ".",
-    "noEmit": true,
-    "allowImportingTsExtensions": true,
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "types": [
+      "node"
+    ]
   },
   "include": [
-    "./**/*.ts"
-, "src/scripts/crawlAndStore.ts"  ],
+    "./src/**/*.ts"
+  ],
   "exclude": [
     "node_modules",
     "dist"

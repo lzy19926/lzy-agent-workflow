@@ -33,11 +33,11 @@
 // LangChain 核心模块
 import { createAgent } from "langchain"
 import { ChatOpenAI } from "@langchain/openai"
-import { loadEnv } from "./env.ts"
+import { loadEnv } from "./env"
 // 向量存储
-import { store } from "./agentStore.ts"
+import { store } from "./agentStore"
 // 工具
-import { tools } from "./tools.ts"
+import { tools } from "./tools"
 
 loadEnv()
 

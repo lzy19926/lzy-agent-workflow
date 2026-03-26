@@ -13,9 +13,9 @@
  * - 方式 2: 先爬取，再手动调用存储函数
  */
 
-import { crawlWebsite } from "./webCrawler.ts"
-import { textSplitter, loadFileData } from "../rag/dataLoader.ts"
-import { storePageData, textVectorStore_crawlee } from "../rag/vectorStore.ts"
+import { crawlWebsite } from "./webCrawler"
+import { textSplitter, loadFileData } from "../src/rag/dataLoader"
+import { storePageData, textVectorStore_crawlee } from "../src/rag/vectorStore"
 import type { PGVectorStore } from "@langchain/community/vectorstores/pgvector"
 
 /**

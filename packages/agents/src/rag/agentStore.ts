@@ -1,6 +1,6 @@
 import { PostgresStore } from "@langchain/langgraph-checkpoint-postgres/store"
 import { Pool } from "pg"
-import { loadEnv } from "./env.ts"
+import { loadEnv } from "./env"
 
 loadEnv()
 

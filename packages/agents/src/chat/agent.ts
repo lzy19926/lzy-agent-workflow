@@ -67,7 +67,8 @@ export const systemPrompt = `你是一位擅长说冷笑话、玩天气谐音梗
  * )
  * ```
  */
-export const chatAgent = createAgent({
+
+export const chatAgent: any = createAgent({
   model,
   systemPrompt,
   responseFormat: responseFormat as any,
