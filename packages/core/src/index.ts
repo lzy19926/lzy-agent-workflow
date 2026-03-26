@@ -1,9 +1,8 @@
 // ==================== VideoDownloadService ====================
 export * from "./VideoDownloadService"
 
-// ==================== Tools ====================
-export { AliOSSUploader } from "./tools/ali-oss-uploader"
-export type { AliOSSConfig, AliOSSUploadResult, UploadOptions } from "./tools/ali-oss-uploader"
+// ==================== FileUploadService ====================
+export * from "./FileUploadService"
 
 export { ClaudeCode } from "./tools/claude-code"
 export type { ClaudeCodeOptions, SkillRegistrationResult } from "./tools/claude-code"
