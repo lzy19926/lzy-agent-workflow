@@ -1,6 +1,13 @@
-import { Downloader } from './base';
-import { DEFAULT_CONFIG, type BilibiliPlatformConfig, type DownloadQuality, type DownloaderConfig } from './config';
-import { AudioDownloadResult, TranscriptResult, TranscriptSegment, DownloadAllResult } from './types';
+import type {
+  DownloadMetadata,
+  BilibiliPlatformConfig,
+  DownloadQuality,
+  AudioDownloadResult,
+  TranscriptResult,
+  TranscriptSegment,
+  DownloadAllResult,
+} from './types';
+import { BaseDownloader, DEFAULT_CONFIG } from './base-downloader';
 import path from 'path';
 import fs from 'fs';
 import YtDlp, { YtDlpVideoInfo } from '../tools/yt-dlp';
@@ -16,7 +23,7 @@ export interface BilibiliDownloaderOptions {
   config?: Partial<BilibiliPlatformConfig>;
 }
 
-export class BilibiliDownloader extends Downloader {
+export class BilibiliDownloader extends BaseDownloader {
   private platformConfig: BilibiliPlatformConfig;
   private ytDlp: YtDlp;
   private ffmpeg: FFmpeg;
@@ -34,6 +41,27 @@ export class BilibiliDownloader extends Downloader {
     this.ffmpeg = new FFmpeg(undefined, undefined, true);
     this.ffmpegPath = this.getFFmpegPath();
     this.ytDlp = new YtDlp();
+  }
+
+  /**
+   * 判断是否支持该视频链接（B 站）
+   */
+  supports(videoUrl: string): boolean {
+    return videoUrl.includes('bilibili.com') || videoUrl.includes('b23.tv');
+  }
+
+  /**
+   * 获取视频元数据
+   */
+  async getMetadata(videoUrl: string): Promise<DownloadMetadata> {
+    const info = await this.ytDlp.getVideoInfo(videoUrl);
+    return {
+      videoId: info.id,
+      title: info.title,
+      duration: info.duration || 0,
+      thumbnail: info.thumbnail,
+      platform: 'bilibili',
+    };
   }
 
   private getFFmpegPath(): string {

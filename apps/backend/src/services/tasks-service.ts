@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
-import { BilibiliDownloader, QwenAsrParser, AliOSSUploader, QwenChat } from '@videomemo/core';
-import { sendSSE, closeSSEConnection } from './events-service';
+import { VideoDownloadService, QwenAsrParser, AliOSSUploader, QwenChat } from '@videomemo/core';
+import { sendSSE } from './events-service';
 
 // 内存存储任务（后续可替换为数据库）
 const tasks = new Map<string, Task>();
@@ -98,8 +98,8 @@ async function executeTask(task: Task) {
 
     // 步骤 1: 下载音频
     console.log(`[Task ${task.id}] 下载音频：${task.videoUrl}`);
-    const downloader = new BilibiliDownloader();
-    const audioResult = await downloader.downloadAudio(task.videoUrl, taskDir);
+    const downloadService = new VideoDownloadService();
+    const audioResult = await downloadService.downloadAudio(task.videoUrl, taskDir);
     task.title = audioResult.title;
     task.coverUrl = audioResult.coverUrl;
     task.progress = 40;
