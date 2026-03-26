@@ -6,8 +6,6 @@
 
 import readline from "readline"
 import { agent } from "./agent.ts"
-import { storePageData, textVectorStore_crawlee } from "./vectorStore.ts"
-import { loadJsonData } from "./dataLoader.ts"
 import path from "path"
 import { fileURLToPath } from "url"
 

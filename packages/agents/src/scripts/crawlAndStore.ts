@@ -14,7 +14,7 @@
  */
 
 import { crawlWebsite } from "./webCrawler.ts"
-import { loadJsonData } from "../rag/dataLoader.ts"
+import { textSplitter, loadFileData } from "../rag/dataLoader.ts"
 import { storePageData, textVectorStore_crawlee } from "../rag/vectorStore.ts"
 import type { PGVectorStore } from "@langchain/community/vectorstores/pgvector"
 
@@ -37,12 +37,16 @@ export async function crawlAndStore(
   const { exportPath, itemCount } = await crawlWebsite(url, maxPages)
   console.log(`\n✅ 爬取完成，保存到：${exportPath}`)
 
-  // 步骤 2: 读取爬取的 JSON 文件
+  // 步骤 2: 读取爬取的文件
   console.log(`\n📖 读取爬取数据...`)
-  const docs = await loadJsonData(exportPath)
-  console.log(`   加载了 ${docs.length} 个文档片段`)
+  const docs = await loadFileData(exportPath)
+  console.log(`   加载了 ${docs.length} 个文档`)
 
-  // 步骤 3: 存储到向量数据库
+  // 步骤 3: 拆分文档
+  const splits = await textSplitter.splitDocuments(docs)
+  console.log(`拆分文档为 ${splits.length} 片段.`)
+
+  // 步骤 4: 存储到向量数据库
   console.log(`\n💾 存储到向量数据库...`)
   await storePageData(docs, store, {
     similarityThreshold: 0.9,

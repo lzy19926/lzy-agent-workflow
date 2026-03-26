@@ -4,13 +4,20 @@
  */
 
 import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/cheerio"
-import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf"
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters"
 import type { Document } from "@langchain/core/documents"
 import fs from "fs"
 
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf"
+import { CSVLoader } from "@langchain/community/document_loaders/fs/csv"
+import { JSONLoader } from "@langchain/classic/document_loaders/fs/json"
+import { JSONLinesLoader } from "@langchain/classic/document_loaders/fs/json";
+import { TextLoader } from "@langchain/classic/document_loaders/fs/text"
+import { DocxLoader } from "@langchain/community/document_loaders/fs/docx";
+import { EPubLoader } from "@langchain/community/document_loaders/fs/epub";
+import { PPTXLoader } from "@langchain/community/document_loaders/fs/pptx";
+import { SRTLoader } from "@langchain/community/document_loaders/fs/srt";
 // ==================== 文本分割器 ====================
-
 /**
  * 全局单例的文本分割器
  * chunkSize: 1000, chunkOverlap: 200
@@ -43,68 +50,60 @@ export async function loadPageData(
 }
 
 /**
- * 加载 PDF 文件
- * @param filePath - PDF 文件路径
+ * 根据文件格式加载文件数据
+ * @param filePath - 文件路径
  * @returns 加载并拆分后的文档数组
  */
-export async function loadPdfData(filePath: string): Promise<Document[]> {
+export async function loadFileData(filePath: string): Promise<Document[]> {
   // 检查文件是否存在
   if (!fs.existsSync(filePath)) {
     throw new Error(`文件不存在：${filePath}`)
   }
 
-  const loader = new PDFLoader(filePath)
+  // 获取文件扩展名
+  const ext = filePath.toLowerCase().split(".").pop()
+
+  let loader: any
+
+  // 根据扩展名选择对应的 loader
+  switch (ext) {
+    case "pdf":
+      loader = new PDFLoader(filePath)
+      break
+    case "csv":
+      loader = new CSVLoader(filePath)
+      break
+    case "json":
+      loader = new JSONLoader(filePath)
+      break
+    case "jsonl":
+    case "jsonlines":
+      loader = new JSONLinesLoader(filePath, "/")
+      break
+    case "txt":
+    case "text":
+    case "md":
+    case "markdown":
+      loader = new TextLoader(filePath)
+      break
+    case "docx":
+      loader = new DocxLoader(filePath)
+      break
+    case "epub":
+      loader = new EPubLoader(filePath)
+      break
+    case "pptx":
+      loader = new PPTXLoader(filePath)
+      break
+    case "srt":
+      loader = new SRTLoader(filePath)
+      break
+    default:
+      throw new Error(`不支持的文件格式：${ext}`)
+  }
+
   const docs = await loader.load()
-  console.log(`Loaded ${docs.length} pages from PDF.`)
+  console.log(`Loaded ${docs.length} documents from .${ext} file.`)
 
-  const allSplits = await textSplitter.splitDocuments(docs)
-  console.log(`Split PDF into ${allSplits.length} sub-documents.`)
-
-  return allSplits
-}
-
-/**
- * 加载 JSON 文件
- * @param filePath - JSON 文件路径
- * @returns 加载并拆分后的文档数组
- */
-export async function loadJsonData(filePath: string): Promise<Document[]> {
-  // 检查文件是否存在
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`文件不存在：${filePath}`)
-  }
-
-  // 检查文件扩展名
-  if (!filePath.endsWith(".json")) {
-    throw new Error(`文件扩展名不是 .json: ${filePath}`)
-  }
-
-  // 读取并解析 JSON
-  let jsonData
-  try {
-    const fileContent = fs.readFileSync(filePath, "utf-8")
-    jsonData = JSON.parse(fileContent)
-  } catch (error) {
-    throw new Error(`JSON 解析失败：${filePath}, ${(error as Error).message}`)
-  }
-
-  // 将 JSON 转为文档对象
-  const docs = Array.isArray(jsonData)
-    ? jsonData.map((item) => ({
-        pageContent: JSON.stringify(item),
-        metadata: { source: filePath },
-      }))
-    : [
-        {
-          pageContent: JSON.stringify(jsonData),
-          metadata: { source: filePath },
-        },
-      ]
-
-  console.log(`Loaded ${docs.length} documents from JSON.`)
-
-  const splits = await textSplitter.splitDocuments(docs)
-  console.log(`Split JSON into ${splits.length} chunks.`)
-
-  return splits
+  return docs
 }
