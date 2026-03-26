@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express"
-import { AnalysisService } from "../services/AnalysisService"
+import { AnalysisService } from "../services/analysis-service"
 import { getAnalysisSteps } from "@videomemo/core"
 
 const router: Router = Router()

@@ -15,7 +15,7 @@ import type {
 export const DEFAULT_CONFIG = {
   outputDir: "../output/analysis",
   skillsSourceDir: path.join(__dirname, "../../src/skills/lzy_ts_code_analyzer"),
-  stepTimeout: 10 * 60 * 1000, // 10 分钟
+  stepTimeout: 5 * 60 * 1000, // 10 分钟
 }
 
 /**
