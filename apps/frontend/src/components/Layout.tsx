@@ -1,6 +1,6 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Layout as AntLayout, Menu, theme } from 'antd';
-import { IeOutlined, HistoryOutlined, SettingOutlined, CodeOutlined } from '@ant-design/icons';
+import { IeOutlined, HistoryOutlined, SettingOutlined, CodeOutlined, MessageOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 
 const { Header, Content } = AntLayout;
@@ -32,6 +32,11 @@ const Layout: React.FC = () => {
       key: '/history',
       icon: <HistoryOutlined />,
       label: '视频历史',
+    },
+    {
+      key: '/chat',
+      icon: <MessageOutlined />,
+      label: 'AI 对话',
     },
     {
       key: '/settings',

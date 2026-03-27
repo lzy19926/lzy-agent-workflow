@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import tasksRouter from './routes/tasks';
 import eventsRouter from './routes/events';
 import analyzeRouter from './routes/analyze';
+import chatRouter from './routes/chat';
 import path from 'path';
 
 // 加载环境变量
@@ -27,6 +28,7 @@ app.use((req: Request, _res: Response, next: () => void) => {
 app.use('/api/tasks', tasksRouter);
 app.use('/api/events', eventsRouter);
 app.use('/api/analyze', analyzeRouter);
+app.use('/api/chat', chatRouter);
 
 // 根路径
 app.get('/', (_req: Request, res: Response) => {
@@ -43,6 +45,8 @@ app.get('/', (_req: Request, res: Response) => {
       analyze: 'POST /api/analyze',
       analyzeStatus: 'GET /api/analyze/:taskId',
       analyzeReport: 'GET /api/analyze/:taskId/report',
+      chat: 'POST /api/chat',
+      chatStream: 'POST /api/chat/stream',
     },
   });
 });
