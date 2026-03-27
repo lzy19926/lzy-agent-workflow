@@ -6,6 +6,8 @@
 import { loadEnv } from "./env"
 import { OpenAIEmbeddings } from "@langchain/openai"
 import { PGVectorStore } from "@langchain/community/vectorstores/pgvector"
+//@ts-ignore
+import { PostgresStore } from "@langchain/langgraph-checkpoint-postgres/store"
 import { Pool } from "pg"
 import cliProgress from "cli-progress"
 
@@ -50,8 +52,10 @@ export interface EmbeddingsConfig {
 // ==================== VectorStoreService ====================
 
 export class VectorStoreService {
-  private pool: Pool
-  // Embeddings 实例
+  // PostgreSQL 实例
+  private pool: Pool | null = null
+  public postgresStore: PostgresStore | null = null
+  // Embeddings 模型实例
   private textEmbeddings: OpenAIEmbeddings | null = null
   private multimodalEmbeddings: OpenAIEmbeddings | null = null
   // 向量存储实例
@@ -62,6 +66,30 @@ export class VectorStoreService {
   public isInitialized: boolean = false
 
   constructor() {
+    this.init()
+  }
+
+  /**
+   * 初始化服务，创建数据库连接池，初始化 Embeddings 模型和向量存储
+   */
+  async init() {
+    if (this.isInitialized) {
+      console.warn("VectorStoreService 已经初始化，重复调用 init() 将被忽略。")
+      return
+    }
+
+    this.initPostgresStore()
+    this.initEmbeddings()
+    await this.initVectorStore()
+
+    this.isInitialized = true
+  }
+
+  /**
+   * 初始化 PostgreSQL 存储
+   * @returns 初始化后的 PostgresStore 实例
+   */
+  private initPostgresStore(): PostgresStore {
     this.pool = new Pool({
       host: process.env.POSTGRES_HOST || "localhost",
       port: parseInt(process.env.POSTGRES_PORT || "5432"),
@@ -70,15 +98,18 @@ export class VectorStoreService {
       database: process.env.POSTGRES_DB || "RAG",
     })
 
-    this.initEmbeddings()
-    this.initVectorStore()
+    const DB_URI = process.env.POSTGRES_URI || ""
+
+    this.postgresStore = PostgresStore.fromConnString(DB_URI)
+
+    return this.postgresStore
   }
 
   /**
    * 初始化 Embeddings 模型
    * @returns 初始化后的 Embeddings 实例
    */
-  initEmbeddings(): {
+  private initEmbeddings(): {
     textEmbeddings: OpenAIEmbeddings
     multimodalEmbeddings: OpenAIEmbeddings
   } {
@@ -114,7 +145,9 @@ export class VectorStoreService {
    * @param tables - 要初始化的表名数组，默认为所有表
    * @returns 包含所有初始化的向量存储实例的对象
    */
-  async initVectorStore(): Promise<Record<VectorStoreTable, PGVectorStore>> {
+  private async initVectorStore(): Promise<
+    Record<VectorStoreTable, PGVectorStore>
+  > {
     if (!this.textEmbeddings) {
       this.initEmbeddings()
     }
@@ -126,7 +159,7 @@ export class VectorStoreService {
     this.textVectorStore_crawlee = await PGVectorStore.initialize(
       this.textEmbeddings!,
       {
-        pool: this.pool,
+        pool: this.pool!,
         tableName: "crawlee_docs",
         columns: {
           idColumnName: "id",
@@ -149,7 +182,7 @@ export class VectorStoreService {
     this.textVectorStore_react = await PGVectorStore.initialize(
       this.textEmbeddings!,
       {
-        pool: this.pool,
+        pool: this.pool!,
         tableName: "react_docs",
         columns: {
           idColumnName: "id",
@@ -168,7 +201,7 @@ export class VectorStoreService {
     this.textVectorStore_tldraw = await PGVectorStore.initialize(
       this.textEmbeddings!,
       {
-        pool: this.pool,
+        pool: this.pool!,
         tableName: "tldraw_docs",
         columns: {
           idColumnName: "id",
@@ -179,8 +212,6 @@ export class VectorStoreService {
         dimensions: 1024,
       }
     )
-
-    this.isInitialized = true
 
     return {
       crawlee_docs: this.textVectorStore_crawlee,
@@ -274,12 +305,11 @@ export class VectorStoreService {
    * 关闭数据库连接池
    */
   async destroyPool(): Promise<void> {
-    await this.pool.end()
+    await this.pool?.end()
     this.textEmbeddings = null
     this.multimodalEmbeddings = null
   }
 }
 
 // ==================== 默认导出 ====================
-
 export const vectorStoreService = new VectorStoreService()

@@ -1,5 +1,5 @@
 // =====================RAG Agent=====================
-export { ragAgent } from './rag/agent'
+export { RagAgentService } from './rag/RagAgentService'
 
 // =====================Chat Agent====================
-export { chatAgent } from './chat/agent'
+// export { chatAgent } from './chat/agent'

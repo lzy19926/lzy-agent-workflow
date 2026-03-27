@@ -5,12 +5,7 @@
  */
 
 import readline from "readline"
-import { ragAgent } from "../src/rag/agent"
-import path from "path"
-import { fileURLToPath } from "url"
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+import { RagAgentService } from "../src/rag/RagAgentService"
 
 // ==================== 命令行交互 ====================
 
@@ -27,6 +22,8 @@ const rl = readline.createInterface({
  */
 async function streamAgentResponse(message: string) {
   const agentInputs = { messages: [{ role: "user", content: message }] }
+  const ragAgentService = new RagAgentService()
+  const ragAgent = await ragAgentService.getAgent()
 
   const stream = await ragAgent.stream(agentInputs, { streamMode: "values" })
 
