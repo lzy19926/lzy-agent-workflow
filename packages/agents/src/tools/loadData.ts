@@ -4,38 +4,27 @@
  */
 
 import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/cheerio"
-import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters"
 import type { Document } from "@langchain/core/documents"
 import fs from "fs"
 
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf"
 import { CSVLoader } from "@langchain/community/document_loaders/fs/csv"
 import { JSONLoader } from "@langchain/classic/document_loaders/fs/json"
-import { JSONLinesLoader } from "@langchain/classic/document_loaders/fs/json";
+import { JSONLinesLoader } from "@langchain/classic/document_loaders/fs/json"
 import { TextLoader } from "@langchain/classic/document_loaders/fs/text"
-import { DocxLoader } from "@langchain/community/document_loaders/fs/docx";
-import { EPubLoader } from "@langchain/community/document_loaders/fs/epub";
-import { PPTXLoader } from "@langchain/community/document_loaders/fs/pptx";
-import { SRTLoader } from "@langchain/community/document_loaders/fs/srt";
-// ==================== 文本分割器 ====================
-/**
- * 全局单例的文本分割器
- * chunkSize: 1000, chunkOverlap: 200
- */
-export const textSplitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 1000,
-  chunkOverlap: 200,
-})
+import { DocxLoader } from "@langchain/community/document_loaders/fs/docx"
+import { EPubLoader } from "@langchain/community/document_loaders/fs/epub"
+import { PPTXLoader } from "@langchain/community/document_loaders/fs/pptx"
+import { SRTLoader } from "@langchain/community/document_loaders/fs/srt"
 
 // ==================== 加载函数 ====================
-
 /**
  * 加载网页数据
  * @param url - 要加载的页面 URL
  * @param selector - CSS 选择器，用于筛选要抓取的元素
  * @returns 加载并拆分后的文档数组
  */
-export async function loadPageData(
+export async function loadUrlData(
   url: string,
   selector: any = "span"
 ): Promise<Document[]> {
@@ -43,10 +32,7 @@ export async function loadPageData(
   const docs = await loader.load()
   console.log(`Total characters: ${docs[0].pageContent.length}`)
 
-  const allSplits = await textSplitter.splitDocuments(docs)
-  console.log(`Split blog post into ${allSplits.length} sub-documents.`)
-
-  return allSplits
+  return docs
 }
 
 /**

@@ -33,14 +33,16 @@
 // LangChain 核心模块
 import { createAgent } from "langchain"
 import { ChatOpenAI } from "@langchain/openai"
-import { loadEnv } from "./env"
+import { loadEnv } from "../tools/env"
+import readline from "readline"
+
 // 向量存储
 import {
   vectorStoreService,
   type VectorStoreService,
 } from "./VectorStoreService"
 // 工具
-import { initTools } from "./tools"
+import { initTools } from "./ragAgentTools"
 
 loadEnv()
 
@@ -93,5 +95,66 @@ export class RagAgentService {
     }
 
     return this.ragAgent as any
+  }
+
+  /**
+   * 流式输出代理响应
+   */
+  async streamAgentResponse(message: string) {
+    const agentInputs = { messages: [{ role: "user", content: message }] }
+    const ragAgentService = new RagAgentService()
+    const ragAgent = await ragAgentService.getAgent()
+
+    const stream = await ragAgent.stream(agentInputs, { streamMode: "values" })
+
+    process.stdout.write("\n[Agent]: ")
+    for await (const step of stream) {
+      const lastMessage = step.messages[step.messages.length - 1]
+
+      // 只输出 assistant 的回复
+      if (lastMessage.name === "model") {
+        process.stdout.write(lastMessage.content)
+      }
+    }
+    console.log("\n")
+  }
+
+  /**启动命令行聊天*/
+  async startChatCli() {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    })
+
+    console.log("=".repeat(50))
+    console.log("欢迎使用 RAG 问答系统!")
+    console.log("输入 'quit' 或 'exit' 退出")
+    console.log("输入 'clear' 清空对话历史")
+    console.log("=".repeat(50))
+    console.log()
+
+    rl.question("请输入您的问题：", async function ask(question) {
+      const input = question.trim().toLowerCase()
+
+      if (input === "quit" || input === "exit") {
+        console.log("再见!")
+        rl.close()
+        return
+      }
+
+      if (input === "clear") {
+        console.log("对话历史已清空\n")
+        rl.question("请输入您的问题：", ask)
+        return
+      }
+
+      if (!question.trim()) {
+        rl.question("请输入您的问题：", ask)
+        return
+      }
+
+      await streamAgentResponse(question)
+      rl.question("请输入您的问题：", ask)
+    })
   }
 }

@@ -3,14 +3,14 @@
  * 提供文本和多模态向量存储功能
  */
 
-import { loadEnv } from "./env"
+import { loadEnv } from "../tools/env"
 import { OpenAIEmbeddings } from "@langchain/openai"
 import { PGVectorStore } from "@langchain/community/vectorstores/pgvector"
 //@ts-ignore
 import { PostgresStore } from "@langchain/langgraph-checkpoint-postgres/store"
 import { Pool } from "pg"
 import cliProgress from "cli-progress"
-
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters"
 loadEnv()
 
 // ==================== 类型定义 ====================
@@ -58,15 +58,23 @@ export class VectorStoreService {
   // Embeddings 模型实例
   private textEmbeddings: OpenAIEmbeddings | null = null
   private multimodalEmbeddings: OpenAIEmbeddings | null = null
+  // 文本分割器实例
+  private textSplitter: RecursiveCharacterTextSplitter | null = null
   // 向量存储实例
   public textVectorStore_crawlee: PGVectorStore | null = null
   public textVectorStore_react: PGVectorStore | null = null
   public textVectorStore_tldraw: PGVectorStore | null = null
+
   // 是否已初始化标志
   public isInitialized: boolean = false
 
   constructor() {
     this.init()
+
+    /**
+     * 全局单例的文本分割器
+     * chunkSize: 1000, chunkOverlap: 200
+     */
   }
 
   /**
@@ -80,9 +88,23 @@ export class VectorStoreService {
 
     this.initPostgresStore()
     this.initEmbeddings()
+    this.initTextSplitter()
     await this.initVectorStore()
 
     this.isInitialized = true
+  }
+
+  /** * 初始化文本分割器
+   * @returns 初始化后的 RecursiveCharacterTextSplitter 实例
+   */
+  private initTextSplitter(): RecursiveCharacterTextSplitter {
+    if (!this.textSplitter) {
+      this.textSplitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 1000,
+        chunkOverlap: 200,
+      })
+    }
+    return this.textSplitter
   }
 
   /**
@@ -252,10 +274,17 @@ export class VectorStoreService {
    * @param config - 去重配置
    */
   async storeDocData(
-    docs: any[],
+    completeDocs: any[],
     store: PGVectorStore,
     config: DedupConfig = { similarityThreshold: 0.9, enabled: true }
   ): Promise<void> {
+    // 文本分割
+    const docs = await this.textSplitter!.splitDocuments(completeDocs)
+    console.log(
+      `Split ${completeDocs.length} documents into ${docs.length} chunks.`
+    )
+
+    // 如果未启用去重，直接存储所有文档
     if (!config.enabled) {
       await store.addDocuments(docs)
       console.log(`💾 Stored ${docs.length} documents to vector store.`)
