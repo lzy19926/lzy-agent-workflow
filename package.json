@@ -7,6 +7,7 @@
     "dev:backend": "pnpm --filter @videomemo/backend dev",
     "dev:frontend": "pnpm --filter @videomemo/frontend dev",
     "build:core": "pnpm --filter @videomemo/core build",
+    "build:agents": "pnpm --filter @videomemo/agents build",
     "build:backend": "pnpm --filter @videomemo/backend build",
     "build:frontend": "pnpm --filter @videomemo/frontend build",
     "build": "lerna run build",
