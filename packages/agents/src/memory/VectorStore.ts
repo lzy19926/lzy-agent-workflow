@@ -49,9 +49,9 @@ export interface EmbeddingsConfig {
   stripNewLines?: boolean
 }
 
-// ==================== VectorStoreService ====================
+// ==================== VectorStore ====================
 
-export class VectorStoreService {
+export class VectorStore {
   // PostgreSQL 实例
   private pool: Pool | null = null
   public postgresStore: PostgresStore | null = null
@@ -70,11 +70,6 @@ export class VectorStoreService {
 
   constructor() {
     this.init()
-
-    /**
-     * 全局单例的文本分割器
-     * chunkSize: 1000, chunkOverlap: 200
-     */
   }
 
   /**
@@ -341,4 +336,4 @@ export class VectorStoreService {
 }
 
 // ==================== 默认导出 ====================
-export const vectorStoreService = new VectorStoreService()
+export const vectorStore = new VectorStore()

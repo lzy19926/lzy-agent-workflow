@@ -13,7 +13,7 @@
  * **/
 import * as z from "zod"
 import { tool, type DynamicTool } from "@langchain/core/tools"
-import type { VectorStoreService } from "./VectorStoreService"
+import type { VectorStore } from "../memory/VectorStore"
 
 // ==================== Schema 定义 ====================
 
@@ -21,20 +21,18 @@ const retrieveSchema = z.object({ query: z.string() })
 
 // ==================== 工具定义 ====================
 export const initTools = (
-  vectorStoreService: VectorStoreService
+  VectorStore: VectorStore
 ): DynamicTool<unknown, unknown>[] => {
-  if (!vectorStoreService.isInitialized) {
-    vectorStoreService.init()
+  if (!VectorStore.isInitialized) {
+    VectorStore.init()
 
-    throw new Error(
-      "VectorStoreService 未初始化，请先调用 vectorStoreService.init()"
-    )
+    throw new Error("VectorStore 未初始化，请先调用 VectorStore.init()")
   }
 
-  // 从 VectorStoreService 获取向量存储实例
-  const textVectorStore_crawlee = vectorStoreService.textVectorStore_crawlee!
-  const textVectorStore_react = vectorStoreService.textVectorStore_react!
-  const textVectorStore_tldraw = vectorStoreService.textVectorStore_tldraw!
+  // 从 VectorStore 获取向量存储实例
+  const textVectorStore_crawlee = VectorStore.textVectorStore_crawlee!
+  const textVectorStore_react = VectorStore.textVectorStore_react!
+  const textVectorStore_tldraw = VectorStore.textVectorStore_tldraw!
 
   /**
    * 从 Crawlee 文档中检索信息

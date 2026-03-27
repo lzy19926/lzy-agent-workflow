@@ -4,12 +4,13 @@
  * 命令行 RAG 问答系统
  */
 
-import { RagAgentService } from "../src/rag/RagAgentService"
-
+import { RagAgent } from "../src/ragAgent/RagAgent"
+import { ChatAgent } from "../src/chatAgent/ChatAgent"
 // ==================== 命令行交互 ====================
-
 ;(() => {
-  const ragAgentService = new RagAgentService()
+  // const ragAgent = new RagAgent()
+  // ragAgent.startChatCli()
 
-  ragAgentService.startChatCli()
+  const chatAgent = new ChatAgent()
+  chatAgent.startChatCli()
 })()

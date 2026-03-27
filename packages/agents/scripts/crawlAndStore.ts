@@ -13,7 +13,7 @@
  * - 方式 2: 先爬取，再手动调用存储函数
  */
 
-import { crawlWebsite } from "./webCrawler"
+import { crawlWebsite } from "../src/tools/crawlWebsite"
 import { textSplitter, loadFileData } from "../src/rag/dataLoader"
 import { storePageData, textVectorStore_crawlee } from "../src/rag/vectorStore"
 import type { PGVectorStore } from "@langchain/community/vectorstores/pgvector"
