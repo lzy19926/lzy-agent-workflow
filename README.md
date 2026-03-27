@@ -1,71 +1,143 @@
 # VideoMemo - AI 智能视频解析与代码分析工作台
 
-> 一站式 AI 集成工作台 - 视频转录 + 代码分析 + AI 自动化测试
+> 一站式 AI 集成工作台：视频转录 + 代码分析 + RAG 智能问答
 
-## 功能特性
-
-### 视频解析
-- 支持 Bilibili 等视频平台音频提取
-- 通义千问 ASR 语音转文字
-- 智能文本整理与摘要
-- 实时任务进度追踪
-- 历史记录持久化存储
-
-### 代码分析
-- 支持 TypeScript/JavaScript 项目系统性分析
-- 多步骤可配置分析流程
-- 生成结构化架构报告
-- 支持技术栈识别与框架检测
-- 分析历史可追溯查看
-
-### AI 自动化测试
-- 基于 Playwright MCP 的端到端测试
-- AI 辅助生成测试用例
-- 跨浏览器兼容性测试
-- 实时 UI 调试模式
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.2-61DAFB?logo=react)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/License-ISC-blue)](LICENSE)
 
 ---
 
-## 技术栈
+## 功能特性
+
+### 视频转录
+- 支持 Bilibili 等视频平台音频提取（基于 yt-dlp）
+- 通义千问 ASR 语音转文字
+- AI 智能文本整理与摘要（Qwen LLM）
+- 实时任务进度追踪（SSE 事件流）
+- IndexedDB 历史记录持久化
+
+### 代码分析
+- TypeScript/JavaScript 项目系统性分析
+- 多步骤可配置分析流程（Claude Code 驱动）
+- 技术栈识别与框架检测
+- 生成结构化 Markdown 报告
+- 分析历史追溯与对比
+
+### RAG 智能问答
+- 基于 LangChain/LangGraph 的 AI Agent
+- PostgreSQL + pgvector 向量语义检索
+- 多格式文档支持（文本/PDF/网页）
+- 流式对话响应（SSE）
+- 上下文感知记忆系统
+
+---
+
+## 技术架构
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      Frontend (React 18)                     │
+│            Vite + Ant Design 5 + TypeScript                  │
+│   ┌──────────┬──────────┬──────────┬────────────────────┐   │
+│   │ HomePage │ ChatPage │ Analysis │ History/Settings   │   │
+│   └──────────┴──────────┴──────────┴────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │ HTTP/SSE
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      Backend (Express)                       │
+│              TypeScript + Event Emitter                      │
+│   ┌──────────────┬──────────────┬──────────────────────┐   │
+│   │ TasksService │ ChatService  │ AnalysisService      │   │
+│   │ (视频转录)    │ (RAG 问答)    │ (代码分析)           │   │
+│   └──────────────┴──────────────┴──────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+          ┌───────────────────┼───────────────────┐
+          ▼                   ▼                   ▼
+   ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+   │ @videomemo  │    │ PostgreSQL  │    │  Aliyun   │
+   │   /core     │    │ + pgvector  │    │ OSS + ASR │
+   │ (核心服务)   │    │ (向量存储)   │    │ (云服务)  │
+   └─────────────┘    └─────────────┘    └─────────────┘
+```
+
+### 技术栈总览
 
 | 层级 | 技术 |
 |------|------|
-| **前端** | React 18 + Vite + TypeScript + Ant Design 5 |
-| **后端** | Express 4 + TypeScript |
-| **数据库** | IndexedDB (Dexie.js) + 内存存储 |
-| **AI 服务** | 通义千问 ASR + 阿里云 OSS |
+| **前端** | React 18 + Vite + TypeScript + Ant Design 5 + TailwindCSS |
+| **状态管理** | Zustand + Dexie.js (IndexedDB) |
+| **后端** | Express 4 + TypeScript + SSE |
+| **AI 框架** | LangChain 1.2 + LangGraph 1.2 |
+| **向量存储** | PostgreSQL + pgvector 0.2 |
+| **AI 服务** | 通义千问 ASR + Qwen LLM |
 | **视频处理** | yt-dlp + FFmpeg |
-| **测试框架** | Playwright + Playwright MCP |
+| **测试** | Playwright 1.58 + Playwright MCP |
 
 ---
 
 ## 项目结构
 
-本项目使用 **Lerna** 进行 monorepo 管理，配合 **pnpm** 进行包管理。
+本项目采用 **Lerna + pnpm** 的 Monorepo 架构：
 
 ```
-lzy-VideoMemo/
+lzy-Agent-Workflow/
 ├── apps/
-│   ├── frontend/        # @videomemo/frontend - React 前端应用 (Vite + Ant Design)
-│   └── backend/         # @videomemo/backend - Express 后端 API 服务
+│   ├── frontend/              # React 前端应用
+│   │   ├── src/
+│   │   │   ├── pages/         # 7 个页面组件
+│   │   │   ├── components/    # 通用 UI 组件
+│   │   │   ├── db/            # IndexedDB 数据层
+│   │   │   ├── hooks/         # React Hooks
+│   │   │   └── api/           # API 客户端
+│   │   └── package.json
+│   │
+│   └── backend/               # Express 后端服务
+│       ├── src/
+│       │   ├── routes/        # API 路由 (tasks/chat/analyze/events)
+│       │   └── services/      # 业务逻辑服务
+│       └── package.json
+│
 ├── packages/
-│   ├── core/            # @videomemo/core - 核心解析逻辑 (下载器/解析器/工具)
-│   └── e2e/             # @videomemo/e2e - Playwright E2E 测试套件
-├── openspec/            # OpenSpec 设计文档
-├── output/              # 解析结果输出目录
-├── lerna.json           # Lerna 配置文件
-├── pnpm-workspace.yaml  # pnpm workspace 配置
-└── README.md
+│   ├── core/                  # 核心工具服务
+│   │   ├── VideoDownloadService/   # 视频下载器
+│   │   ├── ASRService/             # 语音转文字
+│   │   ├── FileUploadService/      # OSS 上传
+│   │   ├── CodeAnalysisService/    # 代码分析执行
+│   │   └── QwenChatService/        # Qwen API 封装
+│   │
+│   ├── agents/                # AI Agent 系统
+│   │   ├── rag/
+│   │   │   ├── RagAgentService.ts   # RAG 代理入口
+│   │   │   ├── VectorStoreService.ts # 向量存储
+│   │   │   ├── dataLoader.ts        # 文档加载器
+│   │   │   └── tools.ts             # RAG 工具函数
+│   │   └── chat/
+│   │       ├── agent.ts             # 对话代理
+│   │       ├── memory.ts            # 对话记忆
+│   │       ├── state.ts             # 状态管理
+│   │       └── response.ts          # 响应处理
+│   │
+│   ├── e2e/                 # Playwright 端到端测试
+│   │   ├── tests/
+│   │   ├── playwright.config.ts
+│   │   └── package.json
+│   │
+│   └── skills/                # 分析技能定义
+│       ├── text_summarizer.md
+│       └── ts_code_analyzer.md
+│
+├── openspec/                  # OpenSpec 设计文档
+├── output/                    # 输出文件目录
+├── package.json               # Root + Lerna 配置
+├── pnpm-workspace.yaml        # pnpm Workspace
+├── lerna.json                 # Lerna 配置
+└── tsconfig.json              # TypeScript 根配置
 ```
-
-### 包依赖关系
-
-| 包名 | 说明 | 依赖 |
-|------|------|------|
-| `@videomemo/frontend` | React 前端应用 | 无 |
-| `@videomemo/backend` | Express 后端服务 | `@videomemo/core` |
-| `@videomemo/core` | 核心解析逻辑 | 无 |
-| `@videomemo/e2e` | Playwright E2E 测试 | 无 |
 
 ---
 
@@ -73,227 +145,104 @@ lzy-VideoMemo/
 
 ### 前置要求
 
-- Node.js >= 18.0.0
-- pnpm >= 8.0.0
-- yt-dlp 和 FFmpeg（已内置于 `bin/` 目录）
+| 依赖 | 版本要求 |
+|------|----------|
+| Node.js | >= 18.0.0 |
+| pnpm | >= 8.0.0 |
+| PostgreSQL | >= 14 (可选，RAG 需要) |
+| pgvector | 0.2.1 (可选，RAG 需要) |
 
-### 安装依赖
+> yt-dlp 和 FFmpeg 已内置于 `packages/core/bin/` 目录
+
+### 1. 安装依赖
 
 ```bash
 pnpm install
 ```
 
-### Lerna 常用命令
+### 2. 配置环境变量
+
+在 `apps/backend/` 目录下创建 `.env` 文件：
 
 ```bash
-# 查看所有包
-pnpm lerna:list
-
-# 构建所有包
-pnpm build
-
-# 构建单个包
-pnpm --filter @videomemo/core build
-pnpm --filter @videomemo/backend build
-pnpm --filter @videomemo/frontend build
-
-# 清理
-pnpm clean
-
-# 版本管理
-pnpm lerna:version    # 版本预览
-pnpm lerna:publish    # 发布新版本
-```
-
-### 配置环境变量
-
-在 `packages/backend/` 目录下创建 `.env` 文件：
-
-```bash
-cd packages/backend
+cd apps/backend
 cp .env.example .env
 ```
 
-编辑 `.env` 文件：
+编辑 `.env`：
 
 ```env
-# 阿里云 OSS 配置
-OSS_BUCKET=your_bucket
+# ==================== 阿里云 OSS ====================
+OSS_BUCKET=your_bucket_name
 OSS_REGION=oss-cn-chengdu
 OSS_ACCESS_KEY_ID=your_access_key_id
 OSS_ACCESS_KEY_SECRET=your_access_key_secret
 
-# 通义千问 ASR 配置
-ASR_API_KEY=sk-your_api_key
+# ==================== 通义 ASR ====================
+ASR_API_KEY=sk-your_asr_api_key
+ASR_MODEL=paraformer-realtime-v1
+
+# ==================== Qwen LLM ====================
+QWEN_API_KEY=sk-your_qwen_api_key
+QWEN_MODEL=qwen-plus
+
+# ==================== RAG 向量库 (可选) ====================
+DATABASE_URL=postgresql://user:password@localhost:5432/videomemo
+
+# ==================== 输出目录 ====================
+OUTPUT_DIR=/path/to/output
 ```
 
-### 启动服务
+### 3. 启动服务
 
-**分别启动:**
+#### 方式一：同时启动前后端
+
 ```bash
-# 终端 1 - 启动后端
+# 终端 1 - 后端服务 (http://localhost:3000)
 pnpm dev:backend
 
-# 终端 2 - 启动前端
+# 终端 2 - 前端应用 (http://localhost:5173)
 pnpm dev:frontend
 ```
 
-### 访问应用
-
-- 前端应用：http://localhost:5173
-- 后端 API：http://localhost:3000
-- 健康检查：http://localhost:3000/api/tasks/health
-
----
-
-## AI 自动化测试 (Playwright MCP)
-
-项目集成了 **Playwright MCP** 进行端到端自动化测试。
-
-### 运行测试
+#### 方式二：开发模式
 
 ```bash
-cd packages/e2e
-
-# 安装浏览器
-pnpm install:browser
-
-# 运行所有测试
-pnpm test
-
-# UI 模式（推荐用于调试）
-pnpm test:ui
-
-# 调试模式
-pnpm test:debug
-
-# 有头模式（显示浏览器）
-pnpm test:headed
-
-# 只运行 Chromium
-pnpm test:chromium
-
-# 查看测试报告
-pnpm test:report
+cd apps/frontend && pnpm dev
 ```
 
-### 测试覆盖范围
+### 4. 访问应用
 
-| 测试文件 | 测试内容 |
-|---------|---------|
-| `navigation.test.ts` | 导航菜单、路由跳转、响应式布局 |
-| `homepage.test.ts` | 视频 URL 输入、表单验证、任务创建 |
-| `settings.test.ts` | API Key 配置、输出目录设置 |
-| `analysis-page.test.ts` | 项目验证、步骤选择、分析流程 |
-| `history-pages.test.ts` | 历史记录列表、查看/删除、分页 |
-| `task-detail.test.ts` | 任务状态、进度条、结果展示 |
-| `user-flow.test.ts` | 完整用户流程、跨浏览器测试 |
-
-### 使用 AI MCP 生成测试
-
-通过 Claude Code 与 Playwright MCP 集成，可以：
-
-1. **自动分析页面结构** - MCP 自动捕获页面快照
-2. **生成页面对象模型** - 自动提取可交互元素
-3. **创建测试用例** - 基于用户操作流程生成测试
-4. **实时调试** - UI 模式可视化调试
-
----
-
-## 使用指南
-
-### 视频解析
-
-1. 访问 **设置** 页面，配置阿里云 API Key
-2. 在 **首页** 输入 B 站视频 URL
-3. 点击 **开始解析**
-4. 等待解析完成，查看结果（原始文本/整理文本/Markdown）
-
-### 代码分析
-
-1. 访问 **代码分析** 页面
-2. 输入代码项目目录路径
-3. 点击 **验证** 确认项目有效
-4. 选择分析步骤（支持全选/自定义）
-5. 点击 **开始分析**
-6. 查看实时进度和分析报告
-
-### 历史记录
-
-- **视频历史** - 查看所有视频解析任务
-- **分析历史** - 查看代码分析任务
-- 支持查看、删除操作
-- 数据持久化于 IndexedDB
-
----
-
-## API 快速参考
-
-### 创建视频任务
-```bash
-POST /api/tasks
-{
-  "videoUrl": "https://www.bilibili.com/video/BVxxx"
-}
-```
-
-### 创建分析任务
-```bash
-POST /api/analyze
-{
-  "projectPath": "/path/to/project",
-  "selectedStepKeys": ["step1", "step2"]
-}
-```
-
-### 获取任务状态
-```bash
-GET /api/tasks/:id
-GET /api/analyze/:id
-```
-
-### SSE 实时事件
-```bash
-GET /api/events?taskId=:id
-```
-
----
-
-## 文档链接
-
-- [启动指南](packages/scripts/STARTUP.md)
-- [API 文档](packages/scripts/API.md)
-- [测试指南](packages/scripts/TEST_GUIDE.md)
-- [E2E 测试文档](packages/e2e/README.md)
-
----
-
-## Lerna 配置说明
-
-`lerna.json` 配置：
-- `version: "independent"` - 使用独立版本模式，每个包独立版本号
-- `npmClient: "pnpm"` - 使用 pnpm 作为包管理器
-- `packages` - 指定 monorepo 包含的包路径（`apps/*` 和 `packages/*`）
+| 服务 | URL |
+|------|-----|
+| 前端应用 | http://localhost:5173 |
+| 后端 API | http://localhost:3000 |
+| 健康检查 | http://localhost:3000/api/tasks/health |
 
 ---
 
 ## 常见问题
 
 ### 端口被占用
-修改 `packages/backend/.env` 中的 `PORT`，或修改 `vite.config.ts` 中的 `server.port`
+- 后端：修改 `apps/backend/.env` 中的 `PORT`
+- 前端：修改 `apps/frontend/vite.config.ts` 中的 `server.port`
 
 ### API Key 无效
-- 检查阿里云账号是否欠费
-- 确认 API Key 格式正确（`sk-` 开头）
-- 确认 ASR 服务已开通
+- 确认阿里云账号状态正常
+- 检查 API Key 格式（`sk-` 开头）
+- 确认 ASR/Qwen 服务已开通
 
-### 下载失败
+### 视频下载失败
 - 检查网络连接
 - 确认视频 URL 有效
-- 更新 yt-dlp: `yt-dlp -U`
+- 更新 yt-dlp：`yt-dlp -U`
+
+### RAG 向量库连接失败
+- 确认 PostgreSQL 服务运行
+- 检查 DATABASE_URL 配置
+- 确保 pgvector 扩展已安装：
+  ```sql
+  CREATE EXTENSION IF NOT EXISTS vector;
+  ```
 
 ---
-
-## 许可证
-
-ISC
