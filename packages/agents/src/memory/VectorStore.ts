@@ -11,6 +11,7 @@ import { PostgresStore } from "@langchain/langgraph-checkpoint-postgres/store"
 import { Pool } from "pg"
 import cliProgress from "cli-progress"
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters"
+import { OllamaEmbeddings } from "@langchain/ollama"
 loadEnv()
 
 // ==================== 类型定义 ====================
@@ -56,7 +57,7 @@ export class VectorStore {
   private pool: Pool | null = null
   public postgresStore: PostgresStore | null = null
   // Embeddings 模型实例
-  private textEmbeddings: OpenAIEmbeddings | null = null
+  private textEmbeddings: OpenAIEmbeddings | OllamaEmbeddings | null = null
   private multimodalEmbeddings: OpenAIEmbeddings | null = null
   // 文本分割器实例
   private textSplitter: RecursiveCharacterTextSplitter | null = null
@@ -127,20 +128,26 @@ export class VectorStore {
    * @returns 初始化后的 Embeddings 实例
    */
   private initEmbeddings(): {
-    textEmbeddings: OpenAIEmbeddings
-    multimodalEmbeddings: OpenAIEmbeddings
+    textEmbeddings: OpenAIEmbeddings | OllamaEmbeddings
+    multimodalEmbeddings: OpenAIEmbeddings | OllamaEmbeddings
   } {
     /**
      * 文本 Embeddings 模型配置
      */
-    this.textEmbeddings = new OpenAIEmbeddings({
-      model: "text-embedding-v4",
-      apiKey: process.env.DASHSCOPE_API_KEY,
-      configuration: {
-        baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
-      },
-      batchSize: 10,
-      stripNewLines: true,
+    // this.textEmbeddings = new OpenAIEmbeddings({
+    //   model: "text-embedding-v4",
+    //   apiKey: process.env.DASHSCOPE_API_KEY,
+    //   configuration: {
+    //     baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    //   },
+    //   batchSize: 10,
+    //   stripNewLines: true,
+    //   dimensions: 1024,
+    // })
+
+    this.textEmbeddings = new OllamaEmbeddings({
+      model: "qwen3-embedding:4b",
+      dimensions: 1024,
     })
 
     /**
@@ -185,9 +192,6 @@ export class VectorStore {
           metadataColumnName: "metadata",
         },
         // 向量维度：必须和你的 Embedding 模型匹配
-        // text-embedding-v4 = 1024
-        // text-embedding-3-small = 1536
-        // text-embedding-3-large = 3072
         dimensions: 1024,
       }
     )

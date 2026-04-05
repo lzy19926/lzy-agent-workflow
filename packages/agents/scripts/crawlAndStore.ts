@@ -14,9 +14,11 @@
  */
 
 import { crawlWebsite } from "../src/tools/crawlWebsite"
-import { textSplitter, loadFileData } from "../src/rag/dataLoader"
-import { storePageData, textVectorStore_crawlee } from "../src/rag/vectorStore"
+import { loadFileData } from "../src/tools/loadData"
+import { VectorStore } from "../src/memory/VectorStore"
 import type { PGVectorStore } from "@langchain/community/vectorstores/pgvector"
+
+const vectorStore = new VectorStore()
 
 /**
  * 爬取网站并将数据存储到向量数据库
@@ -24,7 +26,7 @@ import type { PGVectorStore } from "@langchain/community/vectorstores/pgvector"
  * @param maxPages - 最大爬取页面数，默认 50
  * @param vectorStoreTable - 向量存储表名，默认 'crawlee_docs'
  */
-export async function crawlAndStore(
+async function crawlAndStore(
   url: string,
   store: PGVectorStore,
   maxPages: number = 50
@@ -42,13 +44,9 @@ export async function crawlAndStore(
   const docs = await loadFileData(exportPath)
   console.log(`   加载了 ${docs.length} 个文档`)
 
-  // 步骤 3: 拆分文档
-  const splits = await textSplitter.splitDocuments(docs)
-  console.log(`拆分文档为 ${splits.length} 片段.`)
-
-  // 步骤 4: 存储到向量数据库
+  // 步骤 3: 存储到向量数据库
   console.log(`\n💾 存储到向量数据库...`)
-  await storePageData(docs, store, {
+  await vectorStore.storeDocData(docs, store, {
     similarityThreshold: 0.9,
     enabled: true,
   })
@@ -60,8 +58,15 @@ export async function crawlAndStore(
   return { exportPath, itemCount, docCount: docs.length }
 }
 
-crawlAndStore("https://crawlee.dev", textVectorStore_crawlee, 5).catch(
-  (err) => {
+// ==================== 爬取网站并存储 ====================
+;(async () => {
+  await vectorStore.init()
+
+  crawlAndStore(
+    "https://crawlee.dev",
+    vectorStore.textVectorStore_crawlee!,
+    1
+  ).catch((err) => {
     console.error("❌ 爬取和存储过程中发生错误：", err)
-  }
-)
+  })
+})()

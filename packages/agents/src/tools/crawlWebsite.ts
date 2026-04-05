@@ -28,10 +28,8 @@ import { config } from "dotenv"
  * 从项目根目录下的 .env 文件加载环境变量到 process.env 中
  *  设置 Crawlee 存储目录为 agents/crawlerStorage
  */
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 // 设置 Crawlee 存储目录为 agents/crawlerStorage
-process.env.CRAWLEE_STORAGE_DIR = path.resolve(__dirname, "../../crawlee_storage")
+process.env.CRAWLEE_STORAGE_DIR = path.resolve("../../crawlee_storage")
 
 /**
  * 清理 HTML 内容，提取纯文本
