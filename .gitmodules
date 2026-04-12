@@ -1,0 +1,3 @@
+[submodule "packages/mcp_server"]
+	path = packages/mcp_server
+	url = git@github.com:lzy19926/lzy-yuque-mcp-server.git
