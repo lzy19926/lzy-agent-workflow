@@ -11,6 +11,6 @@
     "outDir": "./dist",
     "rootDir": "."
   },
-  "include": ["./**/*.ts", "packages/agents/src/scripts/webCrawler.js", "packages/agents/src/scripts/crawlAndStore.ts"],
+  "include": ["./**/*.ts", "packages/agents/src/scripts/webCrawler.js", "packages/agents/src/scripts/crawlAndStore.ts", "packages/agents/scripts/evaluateChatAgent.test"],
   "exclude": ["node_modules", "dist"]
 }
